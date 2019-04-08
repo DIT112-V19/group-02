@@ -43,4 +43,4 @@ The use of Arduino and Android libraries would be essential. And the developers 
 * Hanna Maltkvist
 * Marcus Aronsson
 * Oscar Lundberg
-* Sebastian Baszczynsci
+* Sebastian Baszczynski
