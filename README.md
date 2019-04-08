@@ -25,7 +25,7 @@ The use of RFID and its reader could model the mines and the sensor respectively
 * Odometers
 
 ### Software
-The use of Arduino and Android libraries would be essential. And the developers are aiming to develop necessary methods to complete the project.
+The project will be using Arduino and Android libraries. Furthermore, the developers are aiming to develop necessary methods to complete the project.
 * [smartcar](https://github.com/platisd/smartcar_shield) - Library for Arduino based vehicles
 * [Android Studio](https://developer.android.com/studio) - IDE for Android applications
 * [Arduino IDE](https://www.arduino.cc/en/main/software) - IDE for Arduino boards
@@ -40,7 +40,7 @@ The use of Arduino and Android libraries would be essential. And the developers 
 * Adam Klevfors
 * August Axelsson
 * Eyuell Hailemichael
-* Hanna Maltkvist
+* Hannah Maltkvist
 * Marcus Aronsson
-* Oscar Lundberg
+* Oskar Lundberg
 * Sebastian Baszczynski
