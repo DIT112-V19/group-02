@@ -12,7 +12,7 @@ Write a correct user story that is connected to the issue. Make sure to follow I
 
 As a/an  I want to  so that
 
-## Definition of done
+## Acceptance criteria
 
 - [ ] Your open task
 
