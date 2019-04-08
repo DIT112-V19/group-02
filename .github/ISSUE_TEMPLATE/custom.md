@@ -18,7 +18,7 @@ As a/an  I want to  so that
 
 ## To Reproduce
 
-####Steps to reproduce the behavior:
+#### Steps to reproduce the behavior:
 
 Go to '...'
 Click on '....'
