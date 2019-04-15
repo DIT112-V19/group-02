@@ -6,17 +6,17 @@ import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Set;
 
 public class BluetoothActivity extends AppCompatActivity {
-
-    public static final int REQUEST_ENABLE_BT = 99;
 
     private Set<BluetoothDevice> pairedDevices;
     private BluetoothAdapter BA;
@@ -54,19 +54,31 @@ public class BluetoothActivity extends AppCompatActivity {
         Toast.makeText(getApplicationContext(), "Turned off", Toast.LENGTH_LONG).show();
     }
 
-
-    /*
-    public void visible(View v) {
-        Intent getVisible = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-        startActivityForResult(getVisible, 0);
-    }*/
-
-
     public void refresh(View v) {
         pairedDevices = BA.getBondedDevices();
+
         ArrayList list = new ArrayList();
-        for (BluetoothDevice bt : pairedDevices) list.add(bt.getName());
+        for (BluetoothDevice bt : pairedDevices){
+            list.add(bt.getName() + "\n" + bt.getAddress());
+        }
+
         final ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, list);
+
         lv.setAdapter(adapter);
+        lv.setOnItemClickListener(myListClickListener);
     }
+
+    private AdapterView.OnItemClickListener myListClickListener = new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            // Get the device MAC address, the last 17 chars in the View
+            String info = ((TextView) view).getText().toString();
+            String address = info.substring(info.length() - 17);
+            // Make an intent to start next activity.
+            Intent i = new Intent(BluetoothActivity.this, MainActivity.class);
+            i.putExtra("MAC", address);
+            startActivity(i);
+        }
+    };
+
 }
