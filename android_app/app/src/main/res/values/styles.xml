@@ -1,0 +1,20 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <style name="MySeekBar" parent="Widget.AppCompat.SeekBar">
+        <item name="android:minHeight">20dip</item>
+        <item name="android:maxHeight">20dip</item>
+        <item name="android:progressBackgroundTint">#9fa1a3</item>
+        <item name="android:progressTint">#9fa1a3</item>
+        <item name="android:colorControlActivated">#000000</item>
+        <item name="android:splitTrack">false</item>
+    </style>
+
+</resources>
