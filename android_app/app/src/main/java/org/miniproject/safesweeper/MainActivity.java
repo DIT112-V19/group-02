@@ -13,6 +13,7 @@ import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -26,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
     TextView throttleText;
     TextView steeringText;
     TextView connectionTextView;
+    ToggleButton steeringToggle;
 
     public static final int THROTTLE_MIN = -30;
     public static final int THROTTLE_DEFAULT = 30;
@@ -53,8 +55,27 @@ public class MainActivity extends AppCompatActivity {
         throttleText = (TextView) findViewById(R.id.throttleText);
         steeringText = (TextView) findViewById(R.id.steeringText);
         connectionTextView = (TextView) findViewById(R.id.connectionTextView);
+        steeringToggle = (ToggleButton) findViewById(R.id.steeringToggle);
 
         new ConnectBT().execute();
+        //toggle switch to go between manual steering and automatic steering, starts with manual
+        steeringToggle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(steeringToggle.isChecked()){
+                    textView1.setText("Automatic");
+                    auto();
+                    //implement auto sweeping here
+                    //just use the auto we have for now
+                    //send a single character via serial which will kick start the auto? a for auto?
+                }else
+                    textView1.setText("Manual");
+                //implement manual steering here uhhhhhh fuck i'm assuming also single characters
+                //but we gotta do all this shit man
+                //with the drag bar
+                //fuck me
+            }
+        });
 
         btn1.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -62,6 +83,22 @@ public class MainActivity extends AppCompatActivity {
                 textView1.setText("It works");
             }
         });
+
+    }
+
+    private void auto(){
+        if (btSocket!=null)
+        {
+            try
+            {
+                Toast.makeText(MainActivity.this, "It just works", Toast.LENGTH_SHORT).show();
+                btSocket.getOutputStream().write("0".toString().getBytes());
+            }
+            catch (IOException e)
+            {
+                textView1.setText("Error");
+            }
+        }
 
     }
 
@@ -105,6 +142,8 @@ public class MainActivity extends AppCompatActivity {
             if (!ConnectSuccess)
             {
                 Toast.makeText(MainActivity.this, "Could not connect..", Toast.LENGTH_LONG).show();
+              //  Intent intent = new Intent(MainActivity.this, BluetoothActivity.class);
+               // startActivity(intent);
             }
             else
             {
@@ -115,6 +154,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                         throttleText.setText((THROTTLE_MIN + progress) + "");
+                        steeringBar.getProgress();
                     }
 
                     @Override
