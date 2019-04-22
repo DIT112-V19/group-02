@@ -70,6 +70,8 @@ public class MainActivity extends AppCompatActivity {
                     //send a single character via serial which will kick start the auto? a for auto?
                 }else
                     textView1.setText("Manual");
+
+                    manual();
                 //implement manual steering here uhhhhhh fuck i'm assuming also single characters
                 //but we gotta do all this shit man
                 //with the drag bar
@@ -92,6 +94,39 @@ public class MainActivity extends AppCompatActivity {
             try
             {
                 Toast.makeText(MainActivity.this, "It just works", Toast.LENGTH_SHORT).show();
+                btSocket.getOutputStream().write("5".toString().getBytes());//this should actually be whatever we set the auto to
+            }
+            catch (IOException e)
+            {
+                textView1.setText("Error");
+            }
+        }
+
+    }
+
+    private void manual(){
+        if (btSocket!=null)
+        {
+            try
+            {
+                if(throttleBar.getProgress() >= 0){
+                    btSocket.getOutputStream().write("0".toString().getBytes());
+                }
+                if(throttleBar.getProgress() <= 0){
+                    btSocket.getOutputStream().write("1".toString().getBytes());
+                }
+                if(steeringBar.getProgress() < 50){
+                    btSocket.getOutputStream().write("2".toString().getBytes());
+                }
+                if(steeringBar.getProgress() > 50){
+                    btSocket.getOutputStream().write("3".toString().getBytes());
+                }
+                if(throttleBar.getProgress() == 0){
+                    btSocket.getOutputStream().write("4".toString().getBytes());
+                }
+                //this should actually be adams code but like, i don't have it
+                Toast.makeText(MainActivity.this, "It just works", Toast.LENGTH_SHORT).show();
+
                 btSocket.getOutputStream().write("0".toString().getBytes());
             }
             catch (IOException e)
