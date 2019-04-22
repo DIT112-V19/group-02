@@ -71,23 +71,23 @@ void loop() {
   }
   else{                                         //Manual mode
     char input = Serial3.read();
-    if (input == '0'){
+    if (input == '0'){                          //Makes it go foward
     car.setSpeed(fSpeed);
     car.setAngle(0);
     } 
-    else if (input == '1'){
+    else if (input == '1'){                     //Makes it go backwards
     car.setSpeed(bSpeed);
     car.setAngle(0);
     } 
-    else if (input == '2'){
+    else if (input == '2'){                     //Makes it turn left
     car.setSpeed(fSpeed);
     car.setAngle(lDegrees);
     }
-    else if (input == '3'){
+    else if (input == '3'){                     //Makes it turn right
     car.setSpeed(fSpeed);
     car.setAngle(rDegrees);
     }
-    else if (input == '9'){
+    else if (input == '9'){                     //Makes it stop
     car.setSpeed(0);
     car.setAngle(0);
     }
