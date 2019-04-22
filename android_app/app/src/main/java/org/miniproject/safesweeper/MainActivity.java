@@ -109,20 +109,20 @@ public class MainActivity extends AppCompatActivity {
         {
             try
             {
-                if(throttleBar.getProgress() >= 0){
-                    btSocket.getOutputStream().write("0".toString().getBytes());
+                if(throttleBar.getProgress() > 0){
+                    btSocket.getOutputStream().write("0".toString().getBytes());//go forward
                 }
-                if(throttleBar.getProgress() <= 0){
-                    btSocket.getOutputStream().write("1".toString().getBytes());
+                else if(throttleBar.getProgress() < 0){
+                    btSocket.getOutputStream().write("1".toString().getBytes());//go backwards
                 }
-                if(steeringBar.getProgress() < 50){
-                    btSocket.getOutputStream().write("2".toString().getBytes());
+                else if(throttleBar.getProgress() == 0){
+                    btSocket.getOutputStream().write("4".toString().getBytes());//stop
                 }
-                if(steeringBar.getProgress() > 50){
-                    btSocket.getOutputStream().write("3".toString().getBytes());
+                else if(steeringBar.getProgress() < 50){
+                    btSocket.getOutputStream().write("2".toString().getBytes());//turn to the left
                 }
-                if(throttleBar.getProgress() == 0){
-                    btSocket.getOutputStream().write("4".toString().getBytes());
+                else if(steeringBar.getProgress() > 50){
+                    btSocket.getOutputStream().write("3".toString().getBytes());//turn to the right
                 }
                 //this should actually be adams code but like, i don't have it
                 Toast.makeText(MainActivity.this, "It just works", Toast.LENGTH_SHORT).show();
