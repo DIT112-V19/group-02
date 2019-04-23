@@ -15,6 +15,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import java.io.OutputStream;
 import java.io.IOException;
 import java.util.UUID;
 
@@ -35,11 +36,16 @@ public class MainActivity extends AppCompatActivity {
     public static final int STEERING_MIN = -50;
     public static final int STEERING_DEFAULT = 50;
 
+    private int speedValue;
+    private int steerValue;
+    private String command;
+
     private String macAddress;
     BluetoothAdapter mBluetooth = null;
     BluetoothSocket btSocket = null;
     private boolean isBtConnected = false;
     static final UUID myUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+    private OutputStream outputStream;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -185,11 +191,42 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, "Connected!", Toast.LENGTH_SHORT).show();
                 isBtConnected = true;
 
+                try {
+                    outputStream = btSocket.getOutputStream();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
                 throttleBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                     @Override
                     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                         throttleText.setText((THROTTLE_MIN + progress) + "");
                         steeringBar.getProgress();
+                        speedValue = THROTTLE_MIN + progress;
+
+                        if (speedValue > 25){
+                            command = "1";
+                            try {
+                                outputStream.write(command.getBytes());
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        } else if (speedValue == 0){
+                            command = "0";
+                            try {
+                                outputStream.write(command.getBytes());
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }else if (speedValue < 0){
+                            command = "2";
+                            try {
+                                outputStream.write(command.getBytes());
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
                     }
 
                     @Override
@@ -200,6 +237,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onStopTrackingTouch(SeekBar seekBar) {
                         throttleBar.setProgress(THROTTLE_DEFAULT);
+                        speedValue = 0;
                     }
                 });
 
@@ -207,6 +245,29 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                         steeringText.setText((STEERING_MIN + progress) + "");
+                        steerValue = STEERING_MIN + progress;
+                        if (steerValue > 0){
+                            command = "4";
+                            try {
+                                outputStream.write(command.getBytes());
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }else if (steerValue < 0){
+                            command = "3";
+                            try {
+                                outputStream.write(command.getBytes());
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }else if (steerValue == 0){
+                            command = "0";
+                            try {
+                                outputStream.write(command.getBytes());
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
                     }
 
                     @Override
@@ -217,6 +278,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onStopTrackingTouch(SeekBar seekBar) {
                         steeringBar.setProgress(STEERING_DEFAULT);
+                        steerValue = 0;
                     }
                 });
 
