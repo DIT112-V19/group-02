@@ -21,10 +21,8 @@ const int GYROSCOPE_OFFSET = 37;
 GY50 gyroscope(GYROSCOPE_OFFSET);
 
 //Automatic mode:
-const float CAR_SPEED = 50.0;
-const float SLOWER_SPEED = 30.0;
-const int TURN_RIGHT = 130;  //angle
-const int FULL_CIRCLE = 360; //degree
+const float CAR_SPEED = 60.0;
+const int TURN_RIGHT = 160;  //angle
 const int ZERO = 0;
 const int MIN_B = 5;
 const int EVEN = 2;
@@ -38,7 +36,7 @@ const int rDegrees = 75; //degrees to turn right
 //Smartcar:
 const int BAUD_RATE = 9600; //for serial
 const int ANGLE_CORRECTION = 13;  //offset
-bool automode = true;
+bool automode = false;
 BrushedMotor leftMotor(8, 10, 9);
 BrushedMotor rightMotor(12, 13, 11);
 DifferentialControl control(leftMotor, rightMotor);
@@ -62,34 +60,43 @@ void setup() {
 
 void loop() {
   if(automode){                                 //Automatic mode
+      char input = Serial3.read();
     Serial.println(frontSensor.getDistance());
+    if(input == '6'){
+      automode = false;
+      car.setSpeed(ZERO);
+    }
     if(!obstacleExists()){
       car.setSpeed(CAR_SPEED);
-    } else {
-      rotateTillFree();
+    } 
+    else {                        
+        rotateTillFree();
     }
   }
   else{                                         //Manual mode
     char input = Serial3.read();
     if (input == '0'){                          //Makes it go foward
-    car.setSpeed(fSpeed);
-    car.setAngle(0);
+      car.setSpeed(fSpeed);
+      car.setAngle(0);
     } 
     else if (input == '1'){                     //Makes it go backwards
-    car.setSpeed(bSpeed);
-    car.setAngle(0);
+      car.setSpeed(bSpeed);
+      car.setAngle(0);
     } 
     else if (input == '2'){                     //Makes it turn left
-    car.setSpeed(fSpeed);
-    car.setAngle(lDegrees);
+      car.setSpeed(fSpeed);
+      car.setAngle(lDegrees);
     }
     else if (input == '3'){                     //Makes it turn right
-    car.setSpeed(fSpeed);
-    car.setAngle(rDegrees);
+      car.setSpeed(fSpeed);
+      car.setAngle(rDegrees);
     }
-    else if (input == '9'){                     //Makes it stop
-    car.setSpeed(0);
-    car.setAngle(0);
+    else if (input == '4'){                     //Makes it stop
+      car.setSpeed(0);
+      car.setAngle(0);
+    }
+    else if (input == '5'){
+      automode = true;
     }
   }
 }
