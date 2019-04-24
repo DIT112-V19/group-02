@@ -64,20 +64,33 @@ public class MainActivity extends AppCompatActivity {
         steeringToggle = (ToggleButton) findViewById(R.id.steeringToggle);
 
         new ConnectBT().execute();
+
         //toggle switch to go between manual steering and automatic steering, starts with manual
         steeringToggle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(steeringToggle.isChecked()){
                     textView1.setText("Automatic");
-                    auto();
+                    //auto();
+                    command = "5";
+                    try {
+                        outputStream.write(command.getBytes());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        textView1.setText("Something went wrong");
+                    }
                     //implement auto sweeping here
                     //just use the auto we have for now
                     //send a single character via serial which will kick start the auto? a for auto?
                 }else
                     textView1.setText("Manual");
-
-                    manual();
+                    command = "5";
+                    try {
+                        outputStream.write(command.getBytes());
+                    } catch (IOException e) {
+                    e.printStackTrace();
+                    }
+                    //manual();
                 //implement manual steering here uhhhhhh fuck i'm assuming also single characters
                 //but we gotta do all this shit man
                 //with the drag bar
@@ -200,32 +213,33 @@ public class MainActivity extends AppCompatActivity {
                 throttleBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                     @Override
                     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                        throttleText.setText((THROTTLE_MIN + progress) + "");
                         steeringBar.getProgress();
                         speedValue = THROTTLE_MIN + progress;
-
-                        if (speedValue > 25){
-                            command = "1";
-                            try {
-                                outputStream.write(command.getBytes());
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        } else if (speedValue == 0){
+                        throttleText.setText(speedValue + "");
+                        
+                        if (speedValue > 25){ //go forward when seekbar is above 25%
                             command = "0";
                             try {
                                 outputStream.write(command.getBytes());
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
-                        }else if (speedValue < 0){
-                            command = "2";
+                        } else if (speedValue == 0){ //stand still
+                            command = "4";
+                            try {
+                                outputStream.write(command.getBytes());
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }else if (speedValue < 0){ //go backwards
+                            command = "1";
                             try {
                                 outputStream.write(command.getBytes());
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
                         }
+
 
                     }
 
@@ -244,24 +258,25 @@ public class MainActivity extends AppCompatActivity {
                 steeringBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                     @Override
                     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                        steeringText.setText((STEERING_MIN + progress) + "");
                         steerValue = STEERING_MIN + progress;
-                        if (steerValue > 0){
-                            command = "4";
+                        throttleText.setText(steerValue + "");
+
+                        if (steerValue > 0){ //go left
+                            command = "2";
                             try {
                                 outputStream.write(command.getBytes());
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
-                        }else if (steerValue < 0){
+                        }else if (steerValue < 0){ //go right
                             command = "3";
                             try {
                                 outputStream.write(command.getBytes());
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
-                        }else if (steerValue == 0){
-                            command = "0";
+                        }else if (steerValue == 0){ //stop
+                            command = "4";
                             try {
                                 outputStream.write(command.getBytes());
                             } catch (IOException e) {
