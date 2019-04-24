@@ -79,22 +79,16 @@ public class MainActivity extends AppCompatActivity {
                         e.printStackTrace();
                         textView1.setText("Something went wrong");
                     }
-                    //implement auto sweeping here
-                    //just use the auto we have for now
-                    //send a single character via serial which will kick start the auto? a for auto?
+
                 }else
                     textView1.setText("Manual");
-                    command = "5";
+                    command = "6";
                     try {
                         outputStream.write(command.getBytes());
                     } catch (IOException e) {
                     e.printStackTrace();
                     }
-                    //manual();
-                //implement manual steering here uhhhhhh fuck i'm assuming also single characters
-                //but we gotta do all this shit man
-                //with the drag bar
-                //fuck me
+
             }
         });
 
@@ -106,55 +100,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
-
-    private void auto(){
-        if (btSocket!=null)
-        {
-            try
-            {
-                Toast.makeText(MainActivity.this, "It just works", Toast.LENGTH_SHORT).show();
-                btSocket.getOutputStream().write("5".toString().getBytes());//this should actually be whatever we set the auto to
-            }
-            catch (IOException e)
-            {
-                textView1.setText("Error");
-            }
-        }
-
-    }
-
-    private void manual(){
-        if (btSocket!=null)
-        {
-            try
-            {
-                if(throttleBar.getProgress() > 0){
-                    btSocket.getOutputStream().write("0".toString().getBytes());//go forward
-                }
-                else if(throttleBar.getProgress() < 0){
-                    btSocket.getOutputStream().write("1".toString().getBytes());//go backwards
-                }
-                else if(throttleBar.getProgress() == 0){
-                    btSocket.getOutputStream().write("4".toString().getBytes());//stop
-                }
-                else if(steeringBar.getProgress() < 50){
-                    btSocket.getOutputStream().write("2".toString().getBytes());//turn to the left
-                }
-                else if(steeringBar.getProgress() > 50){
-                    btSocket.getOutputStream().write("3".toString().getBytes());//turn to the right
-                }
-                //this should actually be adams code but like, i don't have it
-                Toast.makeText(MainActivity.this, "It just works", Toast.LENGTH_SHORT).show();
-
-                btSocket.getOutputStream().write("0".toString().getBytes());
-            }
-            catch (IOException e)
-            {
-                textView1.setText("Error");
-            }
-        }
-
-    }
+    
 
     private class ConnectBT extends AsyncTask<Void, Void, Void>  // UI thread
     {
@@ -216,7 +162,7 @@ public class MainActivity extends AppCompatActivity {
                         steeringBar.getProgress();
                         speedValue = THROTTLE_MIN + progress;
                         throttleText.setText(speedValue + "");
-                        
+
                         if (speedValue > 25){ //go forward when seekbar is above 25%
                             command = "0";
                             try {
@@ -261,15 +207,15 @@ public class MainActivity extends AppCompatActivity {
                         steerValue = STEERING_MIN + progress;
                         throttleText.setText(steerValue + "");
 
-                        if (steerValue > 0){ //go left
-                            command = "2";
+                        if (steerValue > 0){ //go right
+                            command = "3";
                             try {
                                 outputStream.write(command.getBytes());
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
-                        }else if (steerValue < 0){ //go right
-                            command = "3";
+                        }else if (steerValue < 0){ //go left
+                            command = "2";
                             try {
                                 outputStream.write(command.getBytes());
                             } catch (IOException e) {
