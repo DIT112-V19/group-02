@@ -15,6 +15,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import java.io.OutputStream;
 import java.io.IOException;
 import java.util.UUID;
 
@@ -35,11 +36,17 @@ public class MainActivity extends AppCompatActivity {
     public static final int STEERING_MIN = -50;
     public static final int STEERING_DEFAULT = 50;
 
+    private int speedValue;
+    private int steerValue;
+    private String command;
+
     private String macAddress;
     BluetoothAdapter mBluetooth = null;
     BluetoothSocket btSocket = null;
     private boolean isBtConnected = false;
     static final UUID myUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+    private OutputStream outputStream;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,49 +65,13 @@ public class MainActivity extends AppCompatActivity {
         steeringToggle = (ToggleButton) findViewById(R.id.steeringToggle);
 
         new ConnectBT().execute();
+
         //toggle switch to go between manual steering and automatic steering, starts with manual
-        steeringToggle.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(steeringToggle.isChecked()){
-                    textView1.setText("Automatic");
-                    auto();
-                    //implement auto sweeping here
-                    //just use the auto we have for now
-                    //send a single character via serial which will kick start the auto? a for auto?
-                }else
-                    textView1.setText("Manual");
-                //implement manual steering here uhhhhhh fuck i'm assuming also single characters
-                //but we gotta do all this shit man
-                //with the drag bar
-                //fuck me
-            }
-        });
 
-        btn1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                textView1.setText("It works");
-            }
-        });
+
 
     }
 
-    private void auto(){
-        if (btSocket!=null)
-        {
-            try
-            {
-                Toast.makeText(MainActivity.this, "It just works", Toast.LENGTH_SHORT).show();
-                btSocket.getOutputStream().write("0".toString().getBytes());
-            }
-            catch (IOException e)
-            {
-                textView1.setText("Error");
-            }
-        }
-
-    }
 
     private class ConnectBT extends AsyncTask<Void, Void, Void>  // UI thread
     {
@@ -150,12 +121,45 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, "Connected!", Toast.LENGTH_SHORT).show();
                 isBtConnected = true;
 
-                throttleBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                try {
+                    outputStream = btSocket.getOutputStream();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                throttleBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() { //Speed controls
                     @Override
                     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                        throttleText.setText((THROTTLE_MIN + progress) + "");
                         steeringBar.getProgress();
+                        speedValue = THROTTLE_MIN + progress;
+                        throttleText.setText(speedValue + "");
+
+                        if (speedValue > 25){ //go forward when seekbar is above 25%
+                            command = "0";
+                            try {
+                                outputStream.write(command.getBytes());
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        } else if (speedValue == 0){ //stand still
+                            command = "4";
+                            try {
+                                outputStream.write(command.getBytes());
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }else if (speedValue < 0){ //go backwards
+                            command = "1";
+                            try {
+                                outputStream.write(command.getBytes());
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+
                     }
+
 
                     @Override
                     public void onStartTrackingTouch(SeekBar seekBar) {
@@ -165,13 +169,64 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onStopTrackingTouch(SeekBar seekBar) {
                         throttleBar.setProgress(THROTTLE_DEFAULT);
+                        speedValue = 0; //Reset speed
                     }
                 });
 
-                steeringBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                steeringToggle.setOnClickListener(new View.OnClickListener() { //Toggle between automatic and manual via different commands
+                    @Override
+                    public void onClick(View v) {
+                        if(steeringToggle.isChecked()){
+                            textView1.setText("Automatic");
+                            //auto();
+                            command = "5";
+                            try {
+                                outputStream.write(command.getBytes());
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                                textView1.setText("Something went wrong");
+                            }
+
+                        }else
+                            textView1.setText("Manual");
+                        command = "6";
+                        try {
+                            outputStream.write(command.getBytes());
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+                });
+
+                steeringBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() { //Steering controls
                     @Override
                     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                        steeringText.setText((STEERING_MIN + progress) + "");
+                        steerValue = STEERING_MIN + progress;
+                        throttleText.setText(steerValue + "");
+
+                        if (steerValue > 0){ //go right
+                            command = "3";
+                            try {
+                                outputStream.write(command.getBytes());
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }else if (steerValue < 0){ //go left
+                            command = "2";
+                            try {
+                                outputStream.write(command.getBytes());
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }else if (steerValue == 0){ //stop
+                            command = "4";
+                            try {
+                                outputStream.write(command.getBytes());
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
                     }
 
                     @Override
@@ -182,6 +237,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onStopTrackingTouch(SeekBar seekBar) {
                         steeringBar.setProgress(STEERING_DEFAULT);
+                        steerValue = 0; //Reset
                     }
                 });
 
