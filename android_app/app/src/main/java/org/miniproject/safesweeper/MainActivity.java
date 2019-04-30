@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.SeekBar;
@@ -75,6 +76,7 @@ public class MainActivity extends AppCompatActivity {
         steeringToggle = (ToggleButton) findViewById(R.id.steeringToggle);
         //TODO initialize getLocationBtn and the "mine notification" element.
 
+        //Start task to connect with cars bluetooth asynchronously
         new ConnectBT().execute();
 
     }
@@ -85,31 +87,27 @@ public class MainActivity extends AppCompatActivity {
         private boolean ConnectSuccess = true; //if it's here, it's almost connected
 
         @Override
-        protected void onPreExecute()
-        {
+        protected void onPreExecute() {
             connectionTextView.setText("Connecting.. Please wait!");
         }
 
         @Override
         protected Void doInBackground(Void... devices) //while the progress dialog is shown, the connection is done in background
         {
-            try
-            {
-                if (btSocket == null || !isBtConnected)
-                {
+            try {
+                if (btSocket == null || !isBtConnected) {
                     mBluetooth = BluetoothAdapter.getDefaultAdapter();//get the mobile bluetooth device
                     BluetoothDevice mBluetoothDevice = mBluetooth.getRemoteDevice(macAddress);//connects to the device's address and checks if it's available
                     btSocket = mBluetoothDevice.createInsecureRfcommSocketToServiceRecord(myUUID);//create a RFCOMM (SPP) connection
                     BluetoothAdapter.getDefaultAdapter().cancelDiscovery();
                     btSocket.connect();//start connection
                 }
-            }
-            catch (IOException e)
-            {
+            } catch (IOException e) {
                 ConnectSuccess = false;//if the try failed, you can check the exception here
             }
             return null;
         }
+
         @Override
         protected void onPostExecute(Void result) //after the doInBackground, it checks if everything went fine
         {
@@ -117,14 +115,11 @@ public class MainActivity extends AppCompatActivity {
 
             connectionTextView.setText("");
 
-            if (!ConnectSuccess)
-            {
+            if (!ConnectSuccess) {
                 Toast.makeText(MainActivity.this, "Could not connect..", Toast.LENGTH_LONG).show();
-              //  Intent intent = new Intent(MainActivity.this, BluetoothActivity.class);
-               // startActivity(intent);
-            }
-            else
-            {
+                //  Intent intent = new Intent(MainActivity.this, BluetoothActivity.class);
+                // startActivity(intent);
+            } else {
                 Toast.makeText(MainActivity.this, "Connected!", Toast.LENGTH_SHORT).show();
                 isBtConnected = true;
 
@@ -141,30 +136,14 @@ public class MainActivity extends AppCompatActivity {
                         speedValue = THROTTLE_MIN + progress;
                         throttleText.setText(speedValue + "");
 
-                        if (speedValue > 25){ //go forward when seekbar is above 25%
+                        if (speedValue > 25) { //go forward when seekbar is above 25%
                             command = MOVE_FORWARD;
-                            try {
-                                outputStream.write(command.getBytes());
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        } else if (speedValue == 0){ //stand still
+                        } else if (speedValue == 0) { //stand still
                             command = STAND_STILL;
-                            try {
-                                outputStream.write(command.getBytes());
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }else if (speedValue < 0){ //go backwards
+                        } else if (speedValue < 0) { //go backwards
                             command = MOVE_BACKWARD;
-                            try {
-                                outputStream.write(command.getBytes());
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
                         }
-
-
+                        writeToCar(command);
                     }
 
 
@@ -184,57 +163,34 @@ public class MainActivity extends AppCompatActivity {
                 steeringToggle.setOnClickListener(new View.OnClickListener() { //Toggle between automatic and manual via different commands
                     @Override
                     public void onClick(View v) {
-                        if(steeringToggle.isChecked()){
+                        if (steeringToggle.isChecked()) {
                             textView1.setText("Automatic");
-                            //auto();
                             command = AUTOMATIC_MODE;
-                            try {
-                                outputStream.write(command.getBytes());
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                                textView1.setText("Something went wrong");
-                            }
-
-                        }else
+                        } else {
                             textView1.setText("Manual");
-                        command = MANUAL_MODE;
-                        try {
-                            outputStream.write(command.getBytes());
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                            command = MANUAL_MODE;
                         }
-
+                        writeToCar(command);
                     }
                 });
 
-                steeringBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() { //Steering controls
+
+                steeringBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
+
+                { //Steering controls
                     @Override
                     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                         steerValue = STEERING_MIN + progress;
                         throttleText.setText(steerValue + "");
 
-                        if (steerValue > 0){ //go right
+                        if (steerValue > 0) { //go right
                             command = STEER_RIGHT;
-                            try {
-                                outputStream.write(command.getBytes());
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }else if (steerValue < 0){ //go left
+                        } else if (steerValue < 0) { //go left
                             command = STEER_LEFT;
-                            try {
-                                outputStream.write(command.getBytes());
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }else if (steerValue == 0){ //stop
+                        } else { //stop
                             command = STAND_STILL;
-                            try {
-                                outputStream.write(command.getBytes());
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
                         }
+                        writeToCar(command);
                     }
 
                     @Override
@@ -250,6 +206,14 @@ public class MainActivity extends AppCompatActivity {
                 });
 
             }
+        }
+    }
+
+    private void writeToCar(String command) {
+        try {
+            outputStream.write(command.getBytes());
+        } catch (IOException exc) {
+            Log.e("IOException: ", exc.getMessage());
         }
     }
 }
