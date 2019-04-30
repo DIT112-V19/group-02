@@ -16,6 +16,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
 import java.util.UUID;
@@ -46,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String MANUAL_MODE = "6";
     public static final String STEER_RIGHT = "3";
     public static final String STEER_LEFT = "2";
+    public static final String GET_LOCATION = "l";
 
     private int speedValue;
     private int steerValue;
@@ -57,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean isBtConnected = false;
     static final UUID myUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     private OutputStream outputStream;
+    private InputStream inputStream;
 
 
     @Override
@@ -123,11 +126,22 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, "Connected!", Toast.LENGTH_SHORT).show();
                 isBtConnected = true;
 
+                //start a thread which will constantly check for inputs from the car
+                new ConnectedThread().run();
+
                 try {
                     outputStream = btSocket.getOutputStream();
-                } catch (IOException e) {
-                    e.printStackTrace();
+                    inputStream = btSocket.getInputStream();
+                } catch (IOException exc) {
+                    Log.e("IOException: ", exc.getMessage());
                 }
+
+                getLocationBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        writeToCar(GET_LOCATION);
+                    }
+                });
 
                 throttleBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() { //Speed controls
                     @Override
@@ -209,11 +223,40 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    //thread to read from car
+    private class ConnectedThread extends Thread {
+        public void run() {
+            byte[] buffer = new byte[256];
+            int bytes;
+
+            try {
+                bytes = inputStream.read(buffer);
+                String readMessage = new String(buffer, 0, bytes);
+                //TODO do something with the read input.
+
+            } catch (IOException exc) {
+                Log.e("IOException: ", exc.getMessage());
+            }
+        }
+    }
+
     private void writeToCar(String command) {
         try {
             outputStream.write(command.getBytes());
         } catch (IOException exc) {
             Log.e("IOException: ", exc.getMessage());
         }
+    }
+
+    private void handleInput(String input){
+        //TODO handle the input
+    }
+
+    private void showLocation(double latitude, double longitude){
+        //TODO show location in some element
+    }
+
+    private void showMineDetected(){
+        //TODO show that a  mine has been detected
     }
 }
