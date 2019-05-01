@@ -23,13 +23,13 @@ import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
 
-    Button btn1;
     Button getLocationBtn;
     TextView textView1;
     SeekBar throttleBar;
     SeekBar steeringBar;
     TextView throttleText;
     TextView steeringText;
+    TextView getLocationText;
     TextView connectionTextView;
     ToggleButton steeringToggle;
 
@@ -69,15 +69,15 @@ public class MainActivity extends AppCompatActivity {
 
         macAddress = getIntent().getStringExtra("MAC");
 
-        btn1 = (Button) findViewById(R.id.btn1);
         textView1 = (TextView) findViewById(R.id.textView1);
         throttleBar = (SeekBar) findViewById(R.id.throttleBar);
         steeringBar = (SeekBar) findViewById(R.id.steeringBar);
         throttleText = (TextView) findViewById(R.id.throttleText);
         steeringText = (TextView) findViewById(R.id.steeringText);
+        getLocationText = (TextView) findViewById(R.id.getLocationText);
         connectionTextView = (TextView) findViewById(R.id.connectionTextView);
         steeringToggle = (ToggleButton) findViewById(R.id.steeringToggle);
-        //TODO initialize getLocationBtn and the "mine notification" element.
+        getLocationBtn = (Button) findViewById(R.id.getLocationBtn);
 
         //Start task to connect with cars bluetooth asynchronously
         new ConnectBT().execute();
@@ -139,7 +139,9 @@ public class MainActivity extends AppCompatActivity {
                 getLocationBtn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        getLocationText.setText("uhhhhhh location");
                         writeToCar(GET_LOCATION);
+
                     }
                 });
 

@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#d1d2d3"
-    tools:context=".MainActivity"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    tools:context=".MainActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -35,12 +34,29 @@
         android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
         android:max="130"
-        android:maxHeight="20dp"
         android:maxWidth="20dp"
+        android:maxHeight="20dp"
         android:progress="30"
         android:progressDrawable="@drawable/seekbar_progress"
         android:rotation="270"
         android:thumb="@drawable/seekbar_thumb" />
+
+    <Button
+        android:id="@+id/getLocationBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignWithParentIfMissing="false"
+        android:layout_alignParentStart="false"
+        android:layout_alignParentLeft="false"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="false"
+        android:layout_alignParentRight="false"
+        android:layout_alignParentBottom="false"
+        android:layout_centerInParent="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="330dp"
+        android:text="Show Location"
+        android:visibility="visible" />
 
     <SeekBar
         android:id="@+id/steeringBar"
@@ -61,23 +77,16 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="52dp"
+        android:layout_marginBottom="173dp"
         android:textOff="Manual"
         android:textOn="Automatic" />
-
-    <Button
-        android:id="@+id/btn1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="180dp"
-        android:text="Test" />
 
     <TextView
         android:id="@+id/textView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true" />
+
 
     <TextView
         android:id="@+id/throttleText"
@@ -92,10 +101,11 @@
         android:id="@+id/steeringText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true"
-        android:layout_marginEnd="106dp"
-        android:layout_marginTop="137dp" />
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="137dp"
+        android:layout_marginEnd="106dp" />
+
 
     <TextView
         android:id="@+id/connectionTextView"
@@ -104,8 +114,18 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="86dp"
-        android:textSize="25dp"
         android:text="text"
-        android:textColor="#ff0000"/>
+        android:textColor="#ff0000"
+        android:textSize="25dp" />
+
+    <TextView
+        android:id="@+id/getLocationText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="86dp"
+        android:textColor="#ff0000"
+        android:textSize="25dp" />
 
 </RelativeLayout>
