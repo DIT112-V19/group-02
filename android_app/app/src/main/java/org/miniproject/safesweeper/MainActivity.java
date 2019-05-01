@@ -1,6 +1,5 @@
 package org.miniproject.safesweeper;
 
-import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
@@ -85,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private class ConnectBT extends AsyncTask<Void, Void, Void>  // UI thread
+    private class ConnectBT extends AsyncTask<Void, Void, Void>
     {
         private boolean ConnectSuccess = true; //if it's here, it's almost connected
 
@@ -116,22 +115,21 @@ public class MainActivity extends AppCompatActivity {
         {
             super.onPostExecute(result);
 
-            connectionTextView.setText("");
+            changeTextOnUiThread("");
+            //connectionTextView.setText("");
 
             if (!ConnectSuccess) {
                 Toast.makeText(MainActivity.this, "Could not connect..", Toast.LENGTH_LONG).show();
-                //  Intent intent = new Intent(MainActivity.this, BluetoothActivity.class);
-                // startActivity(intent);
+                Intent intent = new Intent(MainActivity.this, BluetoothActivity.class);
+                startActivity(intent);
             } else {
                 Toast.makeText(MainActivity.this, "Connected!", Toast.LENGTH_SHORT).show();
                 isBtConnected = true;
 
-                //start a thread which will constantly check for inputs from the car
-                new ConnectedThread().run();
-
                 try {
                     outputStream = btSocket.getOutputStream();
                     inputStream = btSocket.getInputStream();
+
                 } catch (IOException exc) {
                     Log.e("IOException: ", exc.getMessage());
                 }
@@ -170,6 +168,8 @@ public class MainActivity extends AppCompatActivity {
                     public void onStopTrackingTouch(SeekBar seekBar) {
                         throttleBar.setProgress(THROTTLE_DEFAULT);
                         speedValue = 0; //Reset speed
+                        command = STAND_STILL;
+                        writeToCar(command);
                     }
                 });
 
@@ -219,23 +219,33 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
-            }
-        }
-    }
+                //start a thread which will constantly check for inputs from the car
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        while (true) {
+                            byte[] buffer = new byte[256];
+                            int bytes;
+                            String readMessage;
 
-    //thread to read from car
-    private class ConnectedThread extends Thread {
-        public void run() {
-            byte[] buffer = new byte[256];
-            int bytes;
-
-            try {
-                bytes = inputStream.read(buffer);
-                String readMessage = new String(buffer, 0, bytes);
-                //TODO do something with the read input.
-
-            } catch (IOException exc) {
-                Log.e("IOException: ", exc.getMessage());
+                            try {
+                                if (inputStream.available() != 0) {
+                                    bytes = inputStream.read(buffer);
+                                    readMessage = new String(buffer, 0, bytes);
+                                    handleInput(readMessage);
+                                }
+                            } catch (IOException exc) {
+                                Log.e("IOException: ", exc.getMessage());
+                            }
+                            try {
+                                Thread.sleep(500);
+                            } catch (InterruptedException ie) {
+                                // do nothing
+                            }
+                            continue;
+                        }
+                    }
+                }).start();
             }
         }
     }
@@ -248,15 +258,31 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void handleInput(String input){
-        //TODO handle the input
+    private void handleInput(String input) {
+        if(input.matches("m")) {
+            showMineDetected();
+        }
     }
 
-    private void showLocation(double latitude, double longitude){
+    private void showLocation(double latitude, double longitude) {
         //TODO show location in some element
     }
 
-    private void showMineDetected(){
-        //TODO show that a  mine has been detected
+    private void showMineDetected() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                connectionTextView.setText("MINE DETECTED!");
+            }
+        });    }
+
+    public void changeTextOnUiThread(String msg) {
+        final String str = msg;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                connectionTextView.setText(str);
+            }
+        });
     }
 }
