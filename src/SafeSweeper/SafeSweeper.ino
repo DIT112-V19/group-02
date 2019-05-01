@@ -1,4 +1,6 @@
 #include <Smartcar.h>
+#include <SPI.h>
+#include <RFID.h>
 
 
 //Odometer:
@@ -20,25 +22,30 @@ SR04 frontSensor(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);
 const int GYROSCOPE_OFFSET = 37;
 GY50 gyroscope(GYROSCOPE_OFFSET);
 
+//RFID reader:
+#define SS_PIN 4
+#define RST_PIN 5
+RFID rfid(SS_PIN, RST_PIN);
+int serNum[5];
+int cards[][5] = {{129,243,229,47,184}};
+
 //Automatic mode:
-const float CAR_SPEED = 50.0;
-const float SLOWER_SPEED = 30.0;
-const int TURN_RIGHT = 130;  //angle
-const int FULL_CIRCLE = 360; //degree
+const float CAR_SPEED = 40.0;
+const int TURN_RIGHT = 160;  //angle
 const int ZERO = 0;
 const int MIN_B = 5;
 const int EVEN = 2;
 
 //Manual mode:
-const int fSpeed = 70; //70% of the full speed forward
-const int bSpeed = -70; //70% of the full speed backward
-const int lDegrees = -75; //degrees to turn left
-const int rDegrees = 75; //degrees to turn right
+const int fSpeed = 50; //50% of the full speed forward
+const int bSpeed = -50; //50% of the full speed backward
+const int lDegrees = -55; //degrees to turn left
+const int rDegrees = 55; //degrees to turn right
 
 //Smartcar:
 const int BAUD_RATE = 9600; //for serial
 const int ANGLE_CORRECTION = 13;  //offset
-bool automode = true;
+bool automode = false;
 BrushedMotor leftMotor(8, 10, 9);
 BrushedMotor rightMotor(12, 13, 11);
 DifferentialControl control(leftMotor, rightMotor);
@@ -48,6 +55,8 @@ SmartCar car(control, gyroscope, leftOdometer, rightOdometer);
 void setup() {
   Serial.begin(BAUD_RATE);  //The general serial
   Serial3.begin(BAUD_RATE); //Serial for bluetooth
+  SPI.begin();              //Initializes the pins for the RFID reader
+  rfid.init();              //Initializes the reader
   car.setAngle(ANGLE_CORRECTION);
   pinMode(14,INPUT);        //Input pin for bluetooth
   pinMode(15,OUTPUT);       //Output pin for bluetooth
@@ -61,38 +70,53 @@ void setup() {
 }
 
 void loop() {
-  if(automode){                                 //Automatic mode
+  if(rfid.isCard()){
+    car.setSpeed(ZERO);
+    delay(2000);
+  }
+  if(automode == true){                                 //Automatic mode
+      char input = Serial3.read();
     Serial.println(frontSensor.getDistance());
-    if(!obstacleExists()){
+    if(input == '6'){
+      automode = false;
+      car.setSpeed(ZERO);
+    }
+    if(!obstacleExists()&& automode){
       car.setSpeed(CAR_SPEED);
-    } else {
-      rotateTillFree();
+    } 
+    else {                        
+        rotateTillFree();
     }
   }
-  else{                                         //Manual mode
+  else if (automode == false){                           //Manual mode
     char input = Serial3.read();
     if (input == '0'){                          //Makes it go foward
-    car.setSpeed(fSpeed);
-    car.setAngle(0);
+      car.setSpeed(fSpeed);
+      car.setAngle(0);
     } 
     else if (input == '1'){                     //Makes it go backwards
-    car.setSpeed(bSpeed);
-    car.setAngle(0);
+      car.setSpeed(bSpeed);
+      car.setAngle(0);
     } 
     else if (input == '2'){                     //Makes it turn left
-    car.setSpeed(fSpeed);
-    car.setAngle(lDegrees);
+      car.setSpeed(fSpeed);
+      car.setAngle(lDegrees);
     }
     else if (input == '3'){                     //Makes it turn right
-    car.setSpeed(fSpeed);
-    car.setAngle(rDegrees);
+      car.setSpeed(fSpeed);
+      car.setAngle(rDegrees);
     }
-    else if (input == '9'){                     //Makes it stop
-    car.setSpeed(0);
-    car.setAngle(0);
+    else if (input == '4'){                     //Makes it stop
+      car.setSpeed(0);
+      car.setAngle(0);
+    }
+    else if (input == '5'){
+      automode = true;
     }
   }
 }
+
+
 
 //Automatic mode methods:
 /**
