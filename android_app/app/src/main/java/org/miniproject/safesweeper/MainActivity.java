@@ -187,15 +187,15 @@ public class MainActivity extends AppCompatActivity {
                                 textView1.setText("Something went wrong");
                             }
 
-                        }else
+                        }else {
                             textView1.setText("Manual");
-                        command = "6";
-                        try {
-                            outputStream.write(command.getBytes());
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                            command = "6";
+                            try {
+                                outputStream.write(command.getBytes());
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
                         }
-
                     }
                 });
 
