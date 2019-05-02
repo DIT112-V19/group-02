@@ -31,8 +31,8 @@
     <SeekBar
         android:id="@+id/throttleBar"
         style="@style/MySeekBar"
-        android:layout_width="300dp"
-        android:layout_height="wrap_content"
+        android:layout_width="328dp"
+        android:layout_height="60dp"
         android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
         android:layout_marginLeft="-15dp"
@@ -48,14 +48,16 @@
     <SeekBar
         android:id="@+id/steeringBar"
         style="@style/MySeekBar"
-        android:layout_width="300dp"
-        android:layout_height="wrap_content"
+        android:layout_width="273dp"
+        android:layout_height="191dp"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
         android:layout_marginEnd="15dp"
         android:max="100"
+        android:maxWidth="50dp"
         android:progress="50"
         android:progressDrawable="@drawable/seekbar_progress"
+        android:scrollbarSize="70dp"
         android:thumb="@drawable/seekbar_thumb"
         android:thumbTint="#b61717" />
 
