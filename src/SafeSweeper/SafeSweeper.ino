@@ -23,8 +23,8 @@ const int GYROSCOPE_OFFSET = 37;
 GY50 gyroscope(GYROSCOPE_OFFSET);
 
 //RFID reader:
-#define SS_PIN 4
-#define RST_PIN 5
+#define SS_PIN 20
+#define RST_PIN 21
 RFID rfid(SS_PIN, RST_PIN);
 int serNum[5];
 int cards[][5] = {{129,243,229,47,184}};
@@ -70,11 +70,17 @@ void setup() {
 }
 
 void loop() {
-  if(rfid.isCard()){
+  if(rfid.isCard()){                            //Detects mine        
     car.setSpeed(ZERO);
-    delay(2000);
+    Serial3.write('m');
+    
+    while(!Serial3.available()){}
+    char command = Serial3.read();
+    while(command != 'm'){
+      command = Serial3.read();
+    }
   }
-  if(automode == true){                                 //Automatic mode
+  if(automode == true){                         //Automatic mode
       char input = Serial3.read();
     Serial.println(frontSensor.getDistance());
     if(input == '6'){
@@ -88,7 +94,7 @@ void loop() {
         rotateTillFree();
     }
   }
-  else if (automode == false){                           //Manual mode
+  else if (automode == false){                  //Manual mode
     char input = Serial3.read();
     if (input == '0'){                          //Makes it go foward
       car.setSpeed(fSpeed);
