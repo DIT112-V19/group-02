@@ -22,14 +22,15 @@ import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
 
-    Button btn1;
     Button getLocationBtn;
+    Button mineBtn;
     TextView textView1;
     SeekBar throttleBar;
     SeekBar steeringBar;
     TextView throttleText;
     TextView steeringText;
     TextView connectionTextView;
+    TextView locationText;
     ToggleButton steeringToggle;
 
     public static final int THROTTLE_MIN = -30;
@@ -46,7 +47,16 @@ public class MainActivity extends AppCompatActivity {
     public static final String MANUAL_MODE = "6";
     public static final String STEER_RIGHT = "3";
     public static final String STEER_LEFT = "2";
-    public static final String GET_LOCATION = "l";
+    public static final String GET_LOCATION = "c";
+    public static final String ACKNOWLEDGE_MINE = "m";
+
+    //inputs from car
+    public static final String LOCATION_REGEX = "c\\d+\\.\\d+\\s\\d+\\.\\d+/";
+    public static final String MINE_REGEX = "m";
+    public static final String LAT_LNG_SEPARATOR = "\\s";
+    public static final String END_OF_INPUT = "/";
+
+    public static final String DOUBLE_WITH_DECIMALS_REGEX = "\\d+\\.\\d+";
 
     private int speedValue;
     private int steerValue;
@@ -68,15 +78,16 @@ public class MainActivity extends AppCompatActivity {
 
         macAddress = getIntent().getStringExtra("MAC");
 
-        btn1 = (Button) findViewById(R.id.btn1);
         textView1 = (TextView) findViewById(R.id.textView1);
         throttleBar = (SeekBar) findViewById(R.id.throttleBar);
         steeringBar = (SeekBar) findViewById(R.id.steeringBar);
         throttleText = (TextView) findViewById(R.id.throttleText);
         steeringText = (TextView) findViewById(R.id.steeringText);
         connectionTextView = (TextView) findViewById(R.id.connectionTextView);
+        locationText = (TextView) findViewById(R.id.locationText);
         steeringToggle = (ToggleButton) findViewById(R.id.steeringToggle);
-        //TODO initialize getLocationBtn and the "mine notification" element.
+        getLocationBtn = (Button) findViewById(R.id.getLocationBtn);
+        mineBtn = (Button) findViewById(R.id.mineBtn);
 
         //Start task to connect with cars bluetooth asynchronously
         new ConnectBT().execute();
@@ -115,7 +126,7 @@ public class MainActivity extends AppCompatActivity {
         {
             super.onPostExecute(result);
 
-            changeTextOnUiThread("");
+            setConnectionTextView("");
             //connectionTextView.setText("");
 
             if (!ConnectSuccess) {
@@ -219,6 +230,20 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
+                getLocationBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        writeToCar(GET_LOCATION);
+                    }
+                });
+
+                mineBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        writeToCar(ACKNOWLEDGE_MINE);
+                    }
+                });
+
                 //start a thread which will constantly check for inputs from the car
                 new Thread(new Runnable() {
                     @Override
@@ -259,13 +284,42 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void handleInput(String input) {
-        if(input.matches("m")) {
+        if(input.matches(MINE_REGEX)) {
             showMineDetected();
+        }
+
+        else if(input.matches(LOCATION_REGEX)){
+            int indexOfSpace = input.indexOf(LAT_LNG_SEPARATOR);
+            int lastIndex = input.indexOf(END_OF_INPUT);
+
+            String locationStr  = input.substring(1, lastIndex);
+            showLocation(locationStr);
+
+            /* if we need the coordinates as double
+            String latitudeStr = input.substring(1, indexOfSpace);
+            String longitudeStr = input.substring(indexOfSpace + 1, lastIndex);
+            double lat = convertToDouble(latitudeStr);
+            double lng = convertToDouble(longitudeStr);
+            */
         }
     }
 
-    private void showLocation(double latitude, double longitude) {
-        //TODO show location in some element
+    private double convertToDouble(String str){
+        if(str.matches(DOUBLE_WITH_DECIMALS_REGEX)){
+            return Double.parseDouble(str);
+        }else{
+            return 0.0;
+        }
+    }
+
+    private void showLocation(String coordinates) {
+        final String str = coordinates;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                locationText.setText(str);
+            }
+        });
     }
 
     private void showMineDetected() {
@@ -276,7 +330,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });    }
 
-    public void changeTextOnUiThread(String msg) {
+    public void setConnectionTextView(String msg) {
         final String str = msg;
         runOnUiThread(new Runnable() {
             @Override

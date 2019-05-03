@@ -31,14 +31,13 @@
     <SeekBar
         android:id="@+id/throttleBar"
         style="@style/MySeekBar"
-        android:layout_width="328dp"
+        android:layout_width="300dp"
         android:layout_height="60dp"
+        android:layout_above="@+id/steeringToggle"
         android:layout_alignParentStart="true"
-        android:layout_centerVertical="true"
-        android:layout_marginLeft="-15dp"
         android:max="130"
-        android:maxWidth="20dp"
         android:maxHeight="20dp"
+        android:maxWidth="20dp"
         android:progress="30"
         android:progressDrawable="@drawable/seekbar_progress"
         android:rotation="270"
@@ -52,7 +51,6 @@
         android:layout_height="191dp"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
-        android:layout_marginEnd="15dp"
         android:max="100"
         android:maxWidth="50dp"
         android:progress="50"
@@ -65,9 +63,8 @@
         android:id="@+id/steeringToggle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
+        android:layout_alignBottom="@+id/steeringBar"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="106dp"
         android:textOff="Manual"
         android:textOn="Automatic" />
 
@@ -75,16 +72,9 @@
         android:id="@+id/getLocationBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignWithParentIfMissing="false"
-        android:layout_alignParentStart="false"
-        android:layout_alignParentLeft="false"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="false"
-        android:layout_alignParentRight="false"
-        android:layout_alignParentBottom="false"
-        android:layout_centerInParent="true"
+        android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="330dp"
+        android:layout_marginBottom="23dp"
         android:text="Show Location"
         android:visibility="visible" />
 
@@ -118,10 +108,29 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="86dp"
+        android:layout_marginTop="56dp"
         android:fontFamily="monospace"
         android:text="text"
         android:textColor="#b61717"
-        android:textSize="25dp" />
+        android:textSize="25sp" />
+
+    <Button
+        android:id="@+id/mineBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@+id/steeringBar"
+        android:layout_marginEnd="41dp"
+        android:text="ACKNOWLEDGE MINE" />
+
+    <TextView
+        android:id="@+id/locationText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="108dp"
+        android:textColor="#606060"
+        android:textSize="25sp" />
 
 </RelativeLayout>
