@@ -61,6 +61,7 @@ public class MainActivity extends AppCompatActivity {
     private int speedValue;
     private int steerValue;
     private String command;
+    private byte[] commandTest;
 
     private String macAddress;
     BluetoothAdapter mBluetooth = null;
@@ -159,6 +160,8 @@ public class MainActivity extends AppCompatActivity {
                         speedValue = THROTTLE_MIN + progress;
                         throttleText.setText(speedValue + "");
 
+                        commandTest = Command.speed(speedValue);
+
                         if (speedValue > 25) { //go forward when seekbar is above 25%
                             command = MOVE_FORWARD;
                         } else if (speedValue == 0) { //stand still
@@ -166,7 +169,7 @@ public class MainActivity extends AppCompatActivity {
                         } else if (speedValue < 0) { //go backwards
                             command = MOVE_BACKWARD;
                         }
-                        writeToCar(command);
+                        writeToCarTest(commandTest);
                     }
 
 
@@ -208,6 +211,8 @@ public class MainActivity extends AppCompatActivity {
                         steerValue = STEERING_MIN + progress;
                         throttleText.setText(steerValue + "");
 
+                        commandTest = Command.steer(steerValue);
+
                         if (steerValue > 0) { //go right
                             command = STEER_RIGHT;
                         } else if (steerValue < 0) { //go left
@@ -215,7 +220,7 @@ public class MainActivity extends AppCompatActivity {
                         } else { //stop
                             command = STAND_STILL;
                         }
-                        writeToCar(command);
+                        writeToCarTest(commandTest);
                     }
 
                     @Override
@@ -278,6 +283,14 @@ public class MainActivity extends AppCompatActivity {
     private void writeToCar(String command) {
         try {
             outputStream.write(command.getBytes());
+        } catch (IOException exc) {
+            Log.e("IOException: ", exc.getMessage());
+        }
+    }
+
+    private void writeToCarTest(byte[] command) {
+        try {
+            outputStream.write(command);
         } catch (IOException exc) {
             Log.e("IOException: ", exc.getMessage());
         }
