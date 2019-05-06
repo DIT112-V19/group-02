@@ -1,9 +1,6 @@
 language: android
 jdk: oraclejdk8
 
-git:
-    submodules: false
-
 # Set environment variables
 env:
     global:
@@ -54,14 +51,12 @@ before_install:
     - echo yes | sdkmanager "platforms;android-28"
     # Install Travis CI configuration for Arduino sketches
     - source <(curl -SLs https://raw.githubusercontent.com/adafruit/travis-ci-arduino/master/install.sh)
-    - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
-    - git submodule update --init --recursive
 
 install:
     # Install Smartcar shield library (used by our sketch)
     - arduino --install-library "Smartcar shield"
-    - git clone git@github.com:mikalhart/TinyGPS.git
-    - git clone git@github.com:song940/RFID-RC522.git
+    - git clone https://github.com/mikalhart/TinyGPS.git
+    - git clone https://github.com/song940/RFID-RC522.git
 
 script:
     # Build the Android app
