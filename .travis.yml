@@ -43,7 +43,7 @@ before_script:
     - adb devices # Display list of devices
     - adb shell input keyevent 82 &
     # Set `gradlew` as executable
-    - chmod +x $TRAVIS_BUILD_DIR/android/gradlew
+    - chmod +x $TRAVIS_BUILD_DIR/android_app/gradlew
 
 
 before_install:
@@ -58,12 +58,12 @@ install:
 
 script:
     # Build the Android app
-    - cd $TRAVIS_BUILD_DIR/android
+    - cd $TRAVIS_BUILD_DIR/android_app
     - ./gradlew build --stacktrace
     # Run the Android app's unit tests
     - ./gradlew test --info
     # Run the Android app's instrumented tests
     - ./gradlew connectedAndroidTest
     # Build all .ino files for Arduino Mega
-    - cd $TRAVIS_BUILD_DIR/arduino
+    - cd $TRAVIS_BUILD_DIR/src/SafeSweeper
     - build_platform mega2560
