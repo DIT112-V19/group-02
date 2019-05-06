@@ -134,6 +134,13 @@ public class MainActivity extends AppCompatActivity {
                         speedValue = THROTTLE_MIN + progress;
                         throttleText.setText(speedValue + "");
 
+                        try {
+                            outputStream.write(Speed.speedCommand(speedValue)); //Using speedCommand to write speeds to minesweeper
+                        } catch (IOException e) {                              // ^ using this will remove the different if-statements in the main
+                            e.printStackTrace();
+                        }
+
+                        /* NOT USING ATM CLEAN UP WHEN TESTS HAVE BECOME SUCCESSFUL
                         if (speedValue > 25){ //go forward when seekbar is above 25%
                             command = "0";
                             try {
@@ -155,7 +162,7 @@ public class MainActivity extends AppCompatActivity {
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
-                        }
+                        }*/
 
 
                     }
@@ -205,6 +212,13 @@ public class MainActivity extends AppCompatActivity {
                         steerValue = STEERING_MIN + progress;
                         throttleText.setText(steerValue + "");
 
+                        try {
+                            outputStream.write(Steer.steerCommand(steerValue));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                        /* NOT USING ATM CLEAN UP WHEN TESTS HAVE BECOME SUCCESSFUL
                         if (steerValue > 0){ //go right
                             command = "3";
                             try {
@@ -226,7 +240,7 @@ public class MainActivity extends AppCompatActivity {
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
-                        }
+                        }*/
                     }
 
                     @Override
