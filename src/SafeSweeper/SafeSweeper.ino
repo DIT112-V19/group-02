@@ -7,10 +7,7 @@
 //GPS     
 float lat = 22.2222, lon = 33.3333; // create variable for latitude and longitude object
 SoftwareSerial gpsSerial(18,19);//rx,tx 
-//LiquidCrystal lcd(A0,A1,A2,A3,A4,A5); 
 TinyGPS gps; // create gps object
-
-
 
 //Odometer:
 const unsigned short LEFT_ODOMETER_PIN = 2;
@@ -90,6 +87,7 @@ void loop() {
   if(rfid.isCard()){                            //Detects mine        
     car.setSpeed(ZERO);
     Serial3.write('m');
+    sendGPS();
     
     while(!Serial3.available()){}
     char command = Serial3.read();
@@ -231,7 +229,7 @@ void rotateOnSpot(int targetDegrees, int speed) {
 String getGPS(){
   if(gpsSerial.available()){ // check for gps data 
     if(gps.encode(gpsSerial.read())){  // encode gps data   
-      //to change the gps
+      //to change the gps default values
       lat = 55.585695;
       lon = 69.25685;
       
