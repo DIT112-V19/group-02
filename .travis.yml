@@ -1,19 +1,69 @@
-language: c
+language: android
+jdk: oraclejdk8
+
+# Set environment variables
+env:
+    global:
+        # Set timeout for the Android emulator to come online
+        - ADB_INSTALL_TIMEOUT=10
+        # Set the minimum Android API to support
+        # Note: Not all of them work well with Travis
+        - ANDROID_TARGET=android-22
+
+before_cache:
+    - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
+
+cache:
+  directories:
+    # Cache all dirs under .gradle folder
+    - $HOME/.gradle/daemon       # Cache daemon logs
+    - $HOME/.gradle/native       # Cache library downloaded from the gradle dependency
+    - $HOME/.gradle/wrapper      # Cache the gradle
+    # Try to reuse previously downloaded Arduino resources
+    - $HOME/arduino_ide          # Cache Arduino IDE
+    - $HOME/.arduino15/packages/ # Cache Arduino IDE packages
+
+android:
+  components:
+    - tools # to get the new `repository-11.xml`
+    - tools # see https://github.com/travis-ci/travis-ci/issues/6040#issuecomment-219367943)
+    - platform-tools
+    - build-tools-28.0.3
+    - $ANDROID_TARGET # Our minimum Android version
+    - sys-img-armeabi-v7a-$ANDROID_TARGET
+    - extra-android-m2repository
+    - extra-google-m2repository
+
+before_script:
+    # Launch Android emulator to run the instrumented tests
+    - android list targets
+    - echo no | android create avd --force -n test -t $ANDROID_TARGET --abi armeabi-v7a # Create AVD for given api
+    - emulator -avd test -no-audio -no-window & # Start emulator
+    - android-wait-for-emulator
+    - adb devices # Display list of devices
+    - adb shell input keyevent 82 &
+    # Set `gradlew` as executable
+    - chmod +x $TRAVIS_BUILD_DIR/android/gradlew
+
+
 before_install:
-  - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_1.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :1 -ac -screen 0 1280x1024x16"
-  - sleep 3
-  - export DISPLAY=:1.0
-  - wget http://downloads.arduino.cc/arduino-1.6.5-linux64.tar.xz
-  - tar xf arduino-1.6.5-linux64.tar.xz
-  - sudo mv arduino-1.6.5 /usr/local/share/arduino
-  - sudo ln -s /usr/local/share/arduino/arduino /usr/local/bin/arduino
+    # Install Android 9 SDK and accept its user agreement
+    - echo yes | sdkmanager "platforms;android-28"
+    # Install Travis CI configuration for Arduino sketches
+    - source <(curl -SLs https://raw.githubusercontent.com/adafruit/travis-ci-arduino/master/install.sh)
+
 install:
-  - ln -s $PWD /usr/local/share/arduino/libraries/Smartcar_shield
-  - arduino --install-library "SmartCar"
+    # Install Smartcar shield library (used by our sketch)
+    - arduino --install-library "Smartcar shield"
+
 script:
-  - arduino --verify --board arduino:avr:mega $PWD/src/SafeSweeper/SafeSweeper.ino
-  - arduino --verify --board arduino:avr:mega 
-notifications:
-  email:
-    on_success: never
-    on_failure: never
+    # Build the Android app
+    - cd $TRAVIS_BUILD_DIR/android
+    - ./gradlew build --stacktrace
+    # Run the Android app's unit tests
+    - ./gradlew test --info
+    # Run the Android app's instrumented tests
+    - ./gradlew connectedAndroidTest
+    # Build all .ino files for Arduino Mega
+    - cd $TRAVIS_BUILD_DIR/arduino
+    - build_platform mega2560
