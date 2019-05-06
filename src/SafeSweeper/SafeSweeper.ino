@@ -1,4 +1,14 @@
 #include <Smartcar.h>
+#include <SPI.h>
+#include <RFID.h>
+#include <SoftwareSerial.h>
+#include <TinyGPS.h>    
+
+//GPS     
+float lat = 22.2222, lon = 33.3333; // create variable for latitude and longitude object
+SoftwareSerial gpsSerial(18,19);//rx,tx 
+//LiquidCrystal lcd(A0,A1,A2,A3,A4,A5); 
+TinyGPS gps; // create gps object
 
 
 //Odometer:
@@ -20,25 +30,30 @@ SR04 frontSensor(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);
 const int GYROSCOPE_OFFSET = 37;
 GY50 gyroscope(GYROSCOPE_OFFSET);
 
+//RFID reader:
+#define SS_PIN 20
+#define RST_PIN 21
+RFID rfid(SS_PIN, RST_PIN);
+int serNum[5];
+int cards[][5] = {{129,243,229,47,184}};
+
 //Automatic mode:
-const float CAR_SPEED = 50.0;
-const float SLOWER_SPEED = 30.0;
-const int TURN_RIGHT = 130;  //angle
-const int FULL_CIRCLE = 360; //degree
+const float CAR_SPEED = 40.0;
+const int TURN_RIGHT = 160;  //angle
 const int ZERO = 0;
 const int MIN_B = 5;
 const int EVEN = 2;
 
 //Manual mode:
-const int fSpeed = 70; //70% of the full speed forward
-const int bSpeed = -70; //70% of the full speed backward
-const int lDegrees = -75; //degrees to turn left
-const int rDegrees = 75; //degrees to turn right
+const int fSpeed = 50; //50% of the full speed forward
+const int bSpeed = -50; //50% of the full speed backward
+const int lDegrees = -55; //degrees to turn left
+const int rDegrees = 55; //degrees to turn right
 
 //Smartcar:
 const int BAUD_RATE = 9600; //for serial
 const int ANGLE_CORRECTION = 13;  //offset
-bool automode = true;
+bool automode = false;
 BrushedMotor leftMotor(8, 10, 9);
 BrushedMotor rightMotor(12, 13, 11);
 DifferentialControl control(leftMotor, rightMotor);
@@ -48,6 +63,8 @@ SmartCar car(control, gyroscope, leftOdometer, rightOdometer);
 void setup() {
   Serial.begin(BAUD_RATE);  //The general serial
   Serial3.begin(BAUD_RATE); //Serial for bluetooth
+  SPI.begin();              //Initializes the pins for the RFID reader
+  rfid.init();              //Initializes the reader
   car.setAngle(ANGLE_CORRECTION);
   pinMode(14,INPUT);        //Input pin for bluetooth
   pinMode(15,OUTPUT);       //Output pin for bluetooth
@@ -58,55 +75,87 @@ void setup() {
   rightOdometer.attach(RIGHT_ODOMETER_PIN, []() {
     rightOdometer.update();
   });
+
+  gpsSerial.begin(9600); // connect gps sensor
+
+  // if analog input pin 0 is unconnected, random analog
+  // noise will cause the call to randomSeed() to generate
+  // different seed numbers each time the sketch runs.
+  // randomSeed() will then shuffle the random function.
+  randomSeed(analogRead(0));
 }
 
 void loop() {
-  if(automode){                                 //Automatic mode
-    Serial.println(frontSensor.getDistance());
-    if(!obstacleExists()){
-      car.setSpeed(CAR_SPEED);
-    } else {
-      rotateTillFree();
+  if(rfid.isCard()){                            //Detects mine        
+    car.setSpeed(ZERO);
+    Serial3.write('m');
+    
+    while(!Serial3.available()){}
+    char command = Serial3.read();
+    while(command != 'm'){
+      command = Serial3.read();
     }
   }
-  else{                                         //Manual mode
+  if(automode == true){                         //Automatic mode
+      char input = Serial3.read();
+    Serial.println(frontSensor.getDistance());
+    if(input == '6'){
+      automode = false;
+      car.setSpeed(ZERO);
+    }
+    if(!obstacleExists()&& automode){
+      car.setSpeed(CAR_SPEED);
+    } 
+    else {                        
+        rotateTillFree();
+    }
+  }
+  else if (automode == false){                  //Manual mode
     char input = Serial3.read();
     if (input == '0'){                          //Makes it go foward
-    car.setSpeed(fSpeed);
-    car.setAngle(0);
+      car.setSpeed(fSpeed);
+      car.setAngle(0);
     } 
     else if (input == '1'){                     //Makes it go backwards
-    car.setSpeed(bSpeed);
-    car.setAngle(0);
+      car.setSpeed(bSpeed);
+      car.setAngle(0);
     } 
     else if (input == '2'){                     //Makes it turn left
-    car.setSpeed(fSpeed);
-    car.setAngle(lDegrees);
+      car.setSpeed(fSpeed);
+      car.setAngle(lDegrees);
     }
     else if (input == '3'){                     //Makes it turn right
-    car.setSpeed(fSpeed);
-    car.setAngle(rDegrees);
+      car.setSpeed(fSpeed);
+      car.setAngle(rDegrees);
     }
-    else if (input == '9'){                     //Makes it stop
-    car.setSpeed(0);
-    car.setAngle(0);
+    else if (input == '4'){                     //Makes it stop
+      car.setSpeed(0);
+      car.setAngle(0);
+    }
+    else if (input == '5'){                     //Auto Mode
+      automode = true;
+    }
+    else if (input == 'c'){                     //Send GPS
+    sendGPS();
     }
   }
 }
+
+
 
 //Automatic mode methods:
 /**
    Rotate the car at specified degrees with certain speed untill there is no obstacle
 */
 void rotateTillFree() {
-  int degrees = TURN_RIGHT;
+  int degrees = random(30, 160);
   
   while(obstacleExists()){
     unsigned int initialHeading = car.getHeading();
     bool hasReachedTargetDegrees = false;
     
     while (!hasReachedTargetDegrees) {
-      rotateOnSpot(TURN_RIGHT, CAR_SPEED);
+      rotateOnSpot(degrees, CAR_SPEED);
       int currentHeading = car.getHeading();
       
       if ( currentHeading > initialHeading) {
@@ -175,5 +224,33 @@ void rotateOnSpot(int targetDegrees, int speed) {
     }
     degreesTurnedSoFar = initialHeading - currentHeading; //degrees turned so far is initial heading minus current (initial heading
     //is at least 0 and at most 360. To handle the "edge" cases we substracted or added 360 to currentHeading)
+  }
+}
+
+String getGPS(){
+  if(gpsSerial.available()){ // check for gps data 
+    if(gps.encode(gpsSerial.read())){  // encode gps data   
+      //to change the gps
+      lat = 55.585695;
+      lon = 69.25685;
+      
+      gps.f_get_position(&lat, &lon); // get latitude and longitude 
+      } else {
+        lat = 0;
+        lon = 0;
+      }
+  } 
+  String latitude = String(lat, 6); 
+  String longitude = String(lon, 6);
+  String gpsToBeSent = "c" + latitude + " " + longitude +"/";
+  return gpsToBeSent;
+}
+
+void sendGPS(){
+  String gpsToBeSent = getGPS();
+  int lengthOfChar = gpsToBeSent.length();
+  for(int i = 0; i < lengthOfChar; i++){
+    char shoot = gpsToBeSent.charAt(i);
+    Serial3.write(shoot);
   }
 }
