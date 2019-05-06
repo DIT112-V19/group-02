@@ -1,7 +1,13 @@
 #include <Smartcar.h>
 #include <SPI.h>
 #include <RFID.h>
+#include <SoftwareSerial.h>
+#include <TinyGPS.h>    
 
+//GPS     
+float lat = 22.2222, lon = 33.3333; // create variable for latitude and longitude object
+SoftwareSerial gpsSerial(18,19);//rx,tx 
+TinyGPS gps; // create gps object
 
 //Odometer:
 const unsigned short LEFT_ODOMETER_PIN = 2;
@@ -67,12 +73,21 @@ void setup() {
   rightOdometer.attach(RIGHT_ODOMETER_PIN, []() {
     rightOdometer.update();
   });
+
+  gpsSerial.begin(9600); // connect gps sensor
+
+  // if analog input pin 0 is unconnected, random analog
+  // noise will cause the call to randomSeed() to generate
+  // different seed numbers each time the sketch runs.
+  // randomSeed() will then shuffle the random function.
+  randomSeed(analogRead(0));
 }
 
 void loop() {
   if(rfid.isCard()){                            //Detects mine        
     car.setSpeed(ZERO);
     Serial3.write('m');
+    sendGPS();
     
     while(!Serial3.available()){}
     char command = Serial3.read();
@@ -116,8 +131,11 @@ void loop() {
       car.setSpeed(0);
       car.setAngle(0);
     }
-    else if (input == '5'){
+    else if (input == '5'){                     //Auto Mode
       automode = true;
+    }
+    else if (input == 'c'){                     //Send GPS
+    sendGPS();
     }
   }
 }
@@ -129,14 +147,14 @@ void loop() {
    Rotate the car at specified degrees with certain speed untill there is no obstacle
 */
 void rotateTillFree() {
-  int degrees = TURN_RIGHT;
+  int degrees = random(30, 160);
   
   while(obstacleExists()){
     unsigned int initialHeading = car.getHeading();
     bool hasReachedTargetDegrees = false;
     
     while (!hasReachedTargetDegrees) {
-      rotateOnSpot(TURN_RIGHT, CAR_SPEED);
+      rotateOnSpot(degrees, CAR_SPEED);
       int currentHeading = car.getHeading();
       
       if ( currentHeading > initialHeading) {
@@ -205,5 +223,33 @@ void rotateOnSpot(int targetDegrees, int speed) {
     }
     degreesTurnedSoFar = initialHeading - currentHeading; //degrees turned so far is initial heading minus current (initial heading
     //is at least 0 and at most 360. To handle the "edge" cases we substracted or added 360 to currentHeading)
+  }
+}
+
+String getGPS(){
+  if(gpsSerial.available()){ // check for gps data 
+    if(gps.encode(gpsSerial.read())){  // encode gps data   
+      //to change the gps default values
+      lat = 55.585695;
+      lon = 69.25685;
+      
+      gps.f_get_position(&lat, &lon); // get latitude and longitude 
+      } else {
+        lat = 0;
+        lon = 0;
+      }
+  } 
+  String latitude = String(lat, 6); 
+  String longitude = String(lon, 6);
+  String gpsToBeSent = "c" + latitude + " " + longitude +"/";
+  return gpsToBeSent;
+}
+
+void sendGPS(){
+  String gpsToBeSent = getGPS();
+  int lengthOfChar = gpsToBeSent.length();
+  for(int i = 0; i < lengthOfChar; i++){
+    char shoot = gpsToBeSent.charAt(i);
+    Serial3.write(shoot);
   }
 }
