@@ -5,9 +5,13 @@
 #include <TinyGPS.h>    
 
 //GPS     
-float lat = 22.2222, lon = 33.3333; // create variable for latitude and longitude object
-SoftwareSerial gpsSerial(18,19);//rx,tx 
-TinyGPS gps; // create gps object
+String data = "";
+boolean Mark_Start = false;
+boolean valid = false;
+String GGAUTCtime,GGAlatitude,GGAlongitude,GPStatus,SatelliteNum,HDOPfactor,Height,
+PositionValid,RMCUTCtime,RMClatitude,RMClongitude,Speed,Direction,Date,Declination,Mode;
+
+String gpsLocation = "c0 0/";
 
 //Odometer:
 const unsigned short LEFT_ODOMETER_PIN = 2;
@@ -57,10 +61,10 @@ BrushedMotor rightMotor(12, 13, 11);
 DifferentialControl control(leftMotor, rightMotor);
 SmartCar car(control, gyroscope, leftOdometer, rightOdometer);
 
-
 void setup() {
   Serial.begin(BAUD_RATE);  //The general serial
   Serial3.begin(BAUD_RATE); //Serial for bluetooth
+  Serial1.begin(BAUD_RATE); //Serial for GPS
   SPI.begin();              //Initializes the pins for the RFID reader
   rfid.init();              //Initializes the reader
   car.setAngle(ANGLE_CORRECTION);
@@ -74,8 +78,6 @@ void setup() {
     rightOdometer.update();
   });
 
-  gpsSerial.begin(9600); // connect gps sensor
-
   // if analog input pin 0 is unconnected, random analog
   // noise will cause the call to randomSeed() to generate
   // different seed numbers each time the sketch runs.
@@ -84,6 +86,7 @@ void setup() {
 }
 
 void loop() {
+  lookForGPS();                                 //reads GPS 
   if(rfid.isCard()){                            //Detects mine        
     car.setSpeed(ZERO);
     Serial3.write('m');
@@ -97,7 +100,7 @@ void loop() {
   }
   if(automode == true){                         //Automatic mode
       char input = Serial3.read();
-    Serial.println(frontSensor.getDistance());
+    //Serial.println(frontSensor.getDistance());
     if(input == '6'){
       automode = false;
       car.setSpeed(ZERO);
@@ -226,27 +229,129 @@ void rotateOnSpot(int targetDegrees, int speed) {
   }
 }
 
-String getGPS(){
-  if(gpsSerial.available()){ // check for gps data 
-    if(gps.encode(gpsSerial.read())){  // encode gps data   
-      //to change the gps default values
-      lat = 55.585695;
-      lon = 69.25685;
-      
-      gps.f_get_position(&lat, &lon); // get latitude and longitude 
-      } else {
-        lat = 0;
-        lon = 0;
+//
+void lookForGPS(){
+  if (Serial1.available()> 0){
+    gpsLocation = "c0 0/";
+    
+    if(Mark_Start){
+      data = reader();
+      if(data.equals("GPGGA")){
+        GGAUTCtime = reader();
+        GGAlatitude = reader();
+        GGAlatitude+=reader();
+        GGAlongitude = reader();
+        GGAlongitude+=reader();
+        GPStatus = reader();
+        SatelliteNum = reader();
+        HDOPfactor = reader();
+        Height = reader();
+        Mark_Start = false;
+        valid = true;
+        data = "";
+      } else if(data.equals("GPGSA")){
+        Mark_Start = false;
+        data = "";
+      } else if(data.equals("GPGSV")){
+        Mark_Start = false;
+        data = "";
+      } else if(data.equals("GPRMC")){
+        RMCUTCtime = reader();
+        PositionValid = reader();
+        RMClatitude = reader();
+        RMClatitude+=reader();
+        RMClongitude = reader();
+        RMClongitude+=reader();
+        Speed = reader();
+        Direction = reader();
+        Date = reader();
+        Declination = reader();
+        Declination+=reader();
+        Mode = reader();
+        valid = true;
+        Mark_Start = false;
+        data = "";
+      } else if(data.equals("GPVTG")){
+        Mark_Start = false;
+        data = "";
+      } else{
+        Mark_Start = false;
+        data = "";
       }
-  } 
-  String latitude = String(lat, 6); 
-  String longitude = String(lon, 6);
-  String gpsToBeSent = "c" + latitude + " " + longitude +"/";
-  return gpsToBeSent;
+    }
+    
+    if(valid){
+      if(PositionValid == "A"){
+        Serial.print("Latitude:");
+        //Serial.print(RMClatitude);
+        String convertedLat = convertData(RMClatitude);
+        //Serial.print("   ");
+        Serial.println(convertedLat);
+        Serial.print("Longitude:");
+        //Serial.print(RMClongitude);
+        String convertedLon = convertData(RMClongitude);
+        //Serial.print("   ");
+        Serial.println(convertedLon);
+        Serial.println(" ");
+        gpsLocation = "c" + convertedLat + " " + convertedLon + "/";
+        valid = false;
+      } 
+    }
+    
+    if(Serial1.find("$")){
+      //Serial.println("capture");
+      Mark_Start = true;
+    }
+  }
 }
 
+//reader of GPS if triggered to read
+String reader(){
+  String value = "";
+  int temp;
+  while (Serial1.available() > 0){
+    delay(2);
+    temp = Serial1.read();
+    if((temp == ',')||(temp == '*')){
+      if(value.length()){
+        return value;
+      } else {
+        return "";
+      }     
+    } else if(temp == '$'){
+      //Serial.println("failure");
+      Mark_Start = false;
+    } else {
+      //Serial.println("add");
+      value+=char(temp);
+    }
+  }
+}
+
+//data from GPS will be converted to suitable string
+String convertData(String rawString){
+  char lastChar = rawString.charAt(rawString.length()-1);
+  int dotAt = rawString.indexOf(".");
+  String leftPart = rawString.substring(0,dotAt);
+  String rightPart = rawString.substring(dotAt+1, (rawString.length()-1));
+  int leftDigit = leftPart.length();
+  String left1 = leftPart.substring(0, leftDigit - 2);
+  String left2 = leftPart.substring(leftDigit-2);
+  String newString = left1 + "." + left2 + rightPart;
+  while(newString.charAt(0) == '0'){
+      newString = newString.substring(1);
+  }
+  
+  if(lastChar == 'W' || lastChar == 'S'){
+      newString = "-" + newString;
+  }
+  
+  return newString;
+}
+
+//Sends the Current GPS Location 
 void sendGPS(){
-  String gpsToBeSent = getGPS();
+  String gpsToBeSent = gpsLocation;
   int lengthOfChar = gpsToBeSent.length();
   for(int i = 0; i < lengthOfChar; i++){
     char shoot = gpsToBeSent.charAt(i);
