@@ -6,8 +6,10 @@ public class Command {
     public static final String MOVE_FORWARD = "0";
     public static final String STAND_STILL = "4";
     public static final String MOVE_BACKWARD = "1";
-    public static final String STEER_RIGHT = "3";
-    public static final String STEER_LEFT = "2";
+    public static final String STEER_RIGHT = "3"; //consider changing these as well?
+    public static final String STEER_LEFT = "2"; // ""
+    public static final String SHARP_RIGHT = "a"; //left and right as letters for clarity and ease
+    public static final String SHARP_LEFT = "b"; //while programming
 
     //Magic numbers
     public static final int SPEED_0 = 0;
@@ -41,10 +43,14 @@ public class Command {
     public static byte[] steer (int steerValue){
         String command;
 
-        if (steerValue > 0) { //go right
+        if (steerValue > 0 && steerValue < 50) { //go right
             command = STEER_RIGHT;
-        } else if (steerValue < 0) { //go left
+        }else if (steerValue > 50){ //sharp right turn
+            command = SHARP_RIGHT;
+        } else if (steerValue < 0 && steerValue > -50) { //go left
             command = STEER_LEFT;
+        }else if (steerValue < -50 ){  //sharp left turn
+            command = SHARP_LEFT;
         } else { //stop
             command = STAND_STILL;
         }
