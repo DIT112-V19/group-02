@@ -52,6 +52,12 @@ const int bSpeed = -50; //50% of the full speed backward
 const int lDegrees = -55; //degrees to turn left
 const int rDegrees = 55; //degrees to turn right
 
+const int slowSpeed = 30;  
+const int middleSpeed = 50;
+const int highSpeed = 65;
+const int fullSpeed = 80;
+
+
 //Smartcar:
 const int BAUD_RATE = 9600; //for serial
 const int ANGLE_CORRECTION = 13;  //offset
@@ -100,46 +106,66 @@ void loop() {
   }
 }
 
-void findTag(){
-                            //Detects mine        
-    car.setSpeed(ZERO);
-    Serial3.write('m');
-    sendGPS();
+void findTag(){                                 // Detects mine
+                                   
+   car.setSpeed(ZERO);
+   Serial3.write('m');
+   sendGPS();
     
-    while(!Serial3.available()){}
-    char command = Serial3.read();
-    while(command != 'm'){
-      command = Serial3.read();
+   while(!Serial3.available()){}                
+   char command = Serial3.read();
+   while(command != 'm'){                       // Wait for the user to acknowledges the mine
+    command = Serial3.read();
     }
-  
 }
 
 
 void manualMode(){
   
-  char input = Serial3.read();
-    if (input == '0'){                          //Makes it go foward
-      car.setSpeed(fSpeed);
+  char input = Serial3.read();                  // Wait for signal from app
+  
+    if (input == '0'){                          //Makes it stand still
+      car.setSpeed(ZERO);
       car.setAngle(0);
     } 
-    else if (input == '1'){                     //Makes it go backwards
-      car.setSpeed(bSpeed);
+    else if (input == '1'){                     //Makes it go slow
+      car.setSpeed(slowSpeed);
       car.setAngle(0);
     } 
-    else if (input == '2'){                     //Makes it turn left
-      car.setSpeed(fSpeed);
-      car.setAngle(lDegrees);
+    else if (input == '2'){                     //Makes it go middel speed
+      car.setSpeed(middleSpeed);
+      car.setAngle(0);
     }
-    else if (input == '3'){                     //Makes it turn right
-      car.setSpeed(fSpeed);
+    else if (input == '3'){                     //Makes it  go high speed
+      car.setSpeed(highSpeed);
+      car.setAngle(0);
+    }
+    else if (input == '4'){                     //Makes it go full speed
+      car.setSpeed(fullSpeed);
+      car.setAngle(0);
+    }
+    else if (input == '5'){                     //Makes it go backwards
+      car.setSpeed(bSpeed);
+      car.setAngle(0)
+    }
+    else if (input == 'z'){                     // Turn Right
+      car.setSpeed(slowSpeed);
       car.setAngle(rDegrees);
     }
-    else if (input == '4'){                     //Makes it stop
-      car.setSpeed(0);
-      car.setAngle(0);
+    else if(input == 'x'){                      // Turn sharp right
+      car.setSpeed(highSpeed);
+      car.setAngle(rDegrees);
     }
-    else if (input == '5'){                     //Auto Mode
-      automode = true;
+    else if(input == 'y'){                      // Turn left
+      car.setSpeed(slowSpeed);
+      car.setAngle(lDegrees);
+    }
+    else if (input == 'w'){                     // Turn sharp left
+      car.setSpeed(highSpeed);
+      car.setAngle(lDegrees);
+    }
+    else if( input == '7'){                     // AutoMode();
+      autoMode();
     }
     else if (input == 'c'){                     //Send GPS
     sendGPS();
@@ -150,6 +176,7 @@ void manualMode(){
 
 //Automatic mode methods:
 void autoMode(){
+  
   char input = Serial3.read();
     //Serial.println(frontSensor.getDistance());
     if(input == '6'){
