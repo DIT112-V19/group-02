@@ -3,7 +3,10 @@ package org.miniproject.safesweeper;
 public class Command {
 
     //Car commands
-    public static final String MOVE_FORWARD = "0";
+    public static final String MOVE_FSPEED1 = "0";
+    public static final String MOVE_FSPEED2 = "0";
+    public static final String MOVE_FSPEED3 = "0";
+    public static final String MOVE_FSPEED4 = "0";
     public static final String STAND_STILL = "4";
     public static final String MOVE_BACKWARD = "1";
     public static final String STEER_RIGHT = "3"; //consider changing these as well?
@@ -24,13 +27,13 @@ public class Command {
         //for now we only use one speed
 
         if (speedValue > SPEED_1){ //go forward when seekbar is above 25%
-            command = MOVE_FORWARD;
+            command = MOVE_FSPEED1;
         }else if (speedValue > SPEED_2){ // increase speed
-            command = MOVE_FORWARD;
+            command = MOVE_FSPEED2;
         }else if (speedValue > SPEED_3){ // increase speed
-            command = MOVE_FORWARD;
-        }else if (speedValue == SPEED_4){ //MAXIMUM SPEED INITIALIZED - Testing with 0
-            command = STAND_STILL;
+            command = MOVE_FSPEED3;
+        }else if (speedValue == SPEED_4){ //MAXIMUM SPEED INITIALIZED
+            command = MOVE_FSPEED4;
         }else if (speedValue == SPEED_0){ //stand still
             command = STAND_STILL;
         }else if (speedValue < SPEED_0){ //go backwards
