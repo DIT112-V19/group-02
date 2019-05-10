@@ -40,13 +40,9 @@ public class MainActivity extends AppCompatActivity {
     public static final int STEERING_DEFAULT = 50;
 
     //Car commands
-    public static final String MOVE_FORWARD = "0";
-    public static final String STAND_STILL = "4";
-    public static final String MOVE_BACKWARD = "1";
-    public static final String AUTOMATIC_MODE = "5";
+    public static final String STAND_STILL = "0";
+    public static final String AUTOMATIC_MODE = "7";
     public static final String MANUAL_MODE = "6";
-    public static final String STEER_RIGHT = "3";
-    public static final String STEER_LEFT = "2";
     public static final String GET_LOCATION = "c";
     public static final String ACKNOWLEDGE_MINE = "m";
 
@@ -159,16 +155,7 @@ public class MainActivity extends AppCompatActivity {
                         steeringBar.getProgress();
                         speedValue = THROTTLE_MIN + progress;
                         throttleText.setText(speedValue + "");
-
                         commandTest = Command.speed(speedValue);
-
-                        if (speedValue > 25) { //go forward when seekbar is above 25%
-                            command = MOVE_FORWARD;
-                        } else if (speedValue == 0) { //stand still
-                            command = STAND_STILL;
-                        } else if (speedValue < 0) { //go backwards
-                            command = MOVE_BACKWARD;
-                        }
                         writeToCarTest(commandTest);
                     }
 
@@ -209,17 +196,9 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                         steerValue = STEERING_MIN + progress;
-                        throttleText.setText(steerValue + "");
+                        steeringText.setText(steerValue + "");
 
                         commandTest = Command.steer(steerValue);
-
-                        if (steerValue > 0) { //go right
-                            command = STEER_RIGHT;
-                        } else if (steerValue < 0) { //go left
-                            command = STEER_LEFT;
-                        } else { //stop
-                            command = STAND_STILL;
-                        }
                         writeToCarTest(commandTest);
                     }
 
@@ -288,9 +267,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void writeToCarTest(byte[] command) {
+    private void writeToCarTest(byte[] commandTest) {
         try {
-            outputStream.write(command);
+            outputStream.write(commandTest);
         } catch (IOException exc) {
             Log.e("IOException: ", exc.getMessage());
         }
