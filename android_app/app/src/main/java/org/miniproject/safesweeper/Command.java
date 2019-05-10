@@ -3,12 +3,12 @@ package org.miniproject.safesweeper;
 public class Command {
 
     //Car commands
-    public static final String MOVE_FSPEED1 = "0";
-    public static final String MOVE_FSPEED2 = "0";
-    public static final String MOVE_FSPEED3 = "0";
-    public static final String MOVE_FSPEED4 = "0";
-    public static final String STAND_STILL = "4";
-    public static final String MOVE_BACKWARD = "1";
+    public static final String MOVE_FSPEED1 = "1";
+    public static final String MOVE_FSPEED2 = "2";
+    public static final String MOVE_FSPEED3 = "3";
+    public static final String MOVE_FSPEED4 = "4";
+    public static final String STAND_STILL = "0";
+    public static final String MOVE_BACKWARD = "5";
     public static final String STEER_RIGHT = "a"; //consider changing these as well?
     public static final String STEER_LEFT = "b"; // ""
     public static final String SHARP_RIGHT = "c"; //left and right as letters for clarity and ease
