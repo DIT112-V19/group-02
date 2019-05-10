@@ -2,7 +2,7 @@ package org.miniproject.safesweeper;
 
 public class Command {
 
-    //Car commands// OLD COMMANDS
+    //Car commands//
     public static final String MOVE_FSPEED1 = "1";
     public static final String MOVE_FSPEED2 = "2";
     public static final String MOVE_FSPEED3 = "3";
