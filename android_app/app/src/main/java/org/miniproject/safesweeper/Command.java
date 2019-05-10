@@ -2,7 +2,7 @@ package org.miniproject.safesweeper;
 
 public class Command {
 
-    //Car commands
+    //Car commands// OLD COMMANDS
     public static final String MOVE_FSPEED1 = "1";
     public static final String MOVE_FSPEED2 = "2";
     public static final String MOVE_FSPEED3 = "3";
@@ -24,13 +24,12 @@ public class Command {
 
     public static byte[] speed (int speedValue) {
         String command = "zero";
-        //for now we only use one speed
 
-        if (speedValue > SPEED_1){ //go forward when seekbar is above 25%
+        if (speedValue > SPEED_1 && speedValue < SPEED_2){ //go forward when seekbar is above 25%
             command = MOVE_FSPEED1;
-        }else if (speedValue > SPEED_2){ // increase speed
+        }else if (speedValue > SPEED_2 && speedValue < SPEED_3){ // increase speed
             command = MOVE_FSPEED2;
-        }else if (speedValue > SPEED_3){ // increase speed
+        }else if (speedValue > SPEED_3 && speedValue < SPEED_4){ // increase speed
             command = MOVE_FSPEED3;
         }else if (speedValue == SPEED_4){ //MAXIMUM SPEED INITIALIZED
             command = MOVE_FSPEED4;
@@ -48,11 +47,11 @@ public class Command {
 
         if (steerValue > 0 && steerValue < 50) { //go right
             command = STEER_RIGHT;
-        }else if (steerValue > 50){ //sharp right turn
+        }else if (steerValue == 50){ //sharp right turn
             command = SHARP_RIGHT;
         } else if (steerValue < 0 && steerValue > -50) { //go left
             command = STEER_LEFT;
-        }else if (steerValue < -50 ){  //sharp left turn
+        }else if (steerValue == -50 ){  //sharp left turn
             command = SHARP_LEFT;
         } else { //stop
             command = STAND_STILL;
