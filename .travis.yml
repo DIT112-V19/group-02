@@ -55,6 +55,8 @@ before_install:
 install:
     # Install Smartcar shield library (used by our sketch)
     - arduino --install-library "Smartcar shield"
+    - git clone https://github.com/mikalhart/TinyGPS.git $HOME/arduino_ide/libraries/TinyGPS
+    - git clone https://github.com/song940/RFID-RC522.git $HOME/arduino_ide/libraries/RFID-RC522
 
 script:
     # Build the Android app
