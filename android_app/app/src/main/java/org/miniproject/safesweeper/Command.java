@@ -9,10 +9,10 @@ public class Command {
     public static final String MOVE_FSPEED4 = "4";
     public static final String STAND_STILL = "0";
     public static final String MOVE_BACKWARD = "5";
-    public static final String STEER_RIGHT = "a"; //consider changing these as well?
-    public static final String STEER_LEFT = "b"; // ""
-    public static final String SHARP_RIGHT = "c"; //left and right as letters for clarity and ease
-    public static final String SHARP_LEFT = "d"; //while programming
+    public static final String STEER_RIGHT = "z"; //consider changing these as well?
+    public static final String STEER_LEFT = "y"; // ""
+    public static final String SHARP_RIGHT = "x"; //left and right as letters for clarity and ease
+    public static final String SHARP_LEFT = "w"; //while programming
 
     //Magic numbers
     public static final int SPEED_0 = 0;
