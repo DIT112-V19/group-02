@@ -63,12 +63,12 @@ install:
 
 script:
     # Build the Android app
-    #- cd $TRAVIS_BUILD_DIR/android_app
-    #- ./gradlew build --stacktrace
+    - cd $TRAVIS_BUILD_DIR/android_app
+    - ./gradlew build --stacktrace
     # Run the Android app's unit tests
-    #- ./gradlew test --info
+    - ./gradlew test --info
     # Run the Android app's instrumented tests
-    #- ./gradlew connectedAndroidTest
+    - ./gradlew connectedAndroidTest
     # Build all .ino files for Arduino Mega
     - cd $TRAVIS_BUILD_DIR/src/SafeSweeper
     - build_platform mega2560
