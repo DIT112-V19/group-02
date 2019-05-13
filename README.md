@@ -22,7 +22,6 @@ The use of RFID and its reader could model the mines and the sensor respectively
 * Arduino Bluetooth module
 * L293D H-bridge
 * GY-50 gyroscope module
-* Odometers
 
 ### Software
 The project will be using Arduino and Android libraries. Furthermore, the developers are aiming to develop necessary methods to complete the project.
