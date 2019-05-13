@@ -44,3 +44,5 @@ The project will be using Arduino and Android libraries. Furthermore, the develo
 * Marcus Aronsson
 * Oskar Lundberg
 * Sebastian Baszczynski
+
+
