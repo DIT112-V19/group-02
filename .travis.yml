@@ -12,6 +12,9 @@ env:
 
 before_cache:
     - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
+    - rm -rf $HOME/arduino_ide 
+    - rm -rf $HOME/arduino_ide/libraries/TinyGPS
+    - rm -rf $HOME/arduino_ide/libraries/RFID-RC522
 
 cache:
   directories:
@@ -51,9 +54,6 @@ before_install:
     - echo yes | sdkmanager "platforms;android-28"
     # Install Travis CI configuration for Arduino sketches
     - source <(curl -SLs https://raw.githubusercontent.com/adafruit/travis-ci-arduino/master/install.sh)
-    # Remove arduino libraries
-    - rm -rf $HOME/arduino_ide/libraries/TinyGPS
-    - rm -rf $HOME/arduino_ide/libraries/RFID-RC522
 
 install:
     # Install Smartcar shield library (used by our sketch)
