@@ -1,8 +1,6 @@
 #include <Smartcar.h>
 #include <SPI.h>
-#include <RFID.h>
-#include <SoftwareSerial.h>
-#include <TinyGPS.h>    
+#include <RFID.h> 
 
 //GPS     
 String data = "";
@@ -41,7 +39,6 @@ int cards[][5] = {{129,243,229,47,184}};
 
 //Automatic mode:
 const float CAR_SPEED = 40.0;
-const int TURN_RIGHT = 160;  //angle
 const int ZERO = 0;
 const int MIN_B = 5;
 const int EVEN = 2;
