@@ -1,6 +1,6 @@
 #include <Smartcar.h>
 #include <SPI.h>
-#include <RFID.h> 
+#include <RFID.h>   
 
 //GPS     
 String data = "";
@@ -31,23 +31,28 @@ const int GYROSCOPE_OFFSET = 37;
 GY50 gyroscope(GYROSCOPE_OFFSET);
 
 //RFID reader:
-#define SS_PIN 20
-#define RST_PIN 21
+#define SS_PIN 4
+#define RST_PIN 5
 RFID rfid(SS_PIN, RST_PIN);
 int serNum[5];
 int cards[][5] = {{129,243,229,47,184}};
 
 //Automatic mode:
-const float CAR_SPEED = 40.0;
+const float CAR_SPEED = 30.0;
 const int ZERO = 0;
 const int MIN_B = 5;
 const int EVEN = 2;
 
 //Manual mode:
-const int fSpeed = 50; //50% of the full speed forward
+const int vfSpeed = 75; //very fast speed
+const int fSpeed = 50; //fast speed
+const int mSpeed = 35; //medium speed
+const int sSpeed = 20; //slow speed
 const int bSpeed = -50; //50% of the full speed backward
-const int lDegrees = -55; //degrees to turn left
-const int rDegrees = 55; //degrees to turn right
+const int slDegrees = -75; //degrees to turn left
+const int lDegrees = -50;
+const int srDegrees = 75; //degrees to turn right
+const int rDegrees = 50;
 
 //Smartcar:
 const int BAUD_RATE = 9600; //for serial
@@ -83,21 +88,88 @@ void setup() {
 }
 
 void loop() {
-  lookForGPS();                                 //reads GPS 
   if(rfid.isCard()){                            //Detects mine        
+    detectingMine();
+  }
+  if(automode == true){                         //Automatic mode
+    autoMode();
+  }
+  else if (automode == false){                  //Manual mode
+    manualMode();
+  }
+}
+void detectingMine(){
+    car.setSpeed(10);
     car.setSpeed(ZERO);
     Serial3.write('m');
-    sendGPS();
+    lookForGPS();                                 //reads GPS 
+    //sendGPS();
     
     while(!Serial3.available()){}
     char command = Serial3.read();
     while(command != 'm'){
       command = Serial3.read();
     }
-  }
-  if(automode == true){                         //Automatic mode
-      char input = Serial3.read();
-    //Serial.println(frontSensor.getDistance());
+}
+
+void manualMode(){
+  char input = Serial3.read();
+    if (input == '1'){                          //Makes it go foward in slow speed
+      car.setSpeed(sSpeed);
+      car.setAngle(0);
+    }
+    else if (input == '2'){                     //Makes it go foward in medium speed
+      car.setSpeed(mSpeed);
+      car.setAngle(0);
+    }
+    else if (input == '3'){                     //Makes it go foward in fast speed 
+      car.setSpeed(fSpeed);
+      car.setAngle(0);
+    }
+    else if (input == '4'){                     //Makes it go foward in very fast speed
+      car.setSpeed(vfSpeed);
+      car.setAngle(0);
+    }    
+    else if (input == '5'){                     //Makes it go backwards
+      car.setSpeed(bSpeed);
+      car.setAngle(0);
+    } 
+    else if (input == 'w'){                     //Makes it turn sharp left
+      car.setSpeed(fSpeed);
+      car.setAngle(slDegrees);
+    }
+    else if (input == 'y'){                     //Makes it turn left
+      car.setSpeed(fSpeed);
+      car.setAngle(lDegrees);
+    }
+    else if (input == 'z'){                     //Makes it turn right
+      car.setSpeed(fSpeed);
+      car.setAngle(rDegrees);
+    }
+    else if (input == 'x'){                     //Makes it turn sharp right
+      car.setSpeed(fSpeed);
+      car.setAngle(srDegrees);
+    }
+    else if (input == '0'){                     //Makes it stop
+      car.setSpeed(10);
+      car.setSpeed(0);
+      car.setAngle(0);
+    }
+    else if (input == '7'){                     //Switches to automode
+      automode = true;
+    }
+    else if (input == 'c'){                     //Send GPS
+    lookForGPS();                               //reads GPS 
+    sendGPS();
+    }
+}
+
+
+
+//Automatic mode methods:
+
+void autoMode(){
+  char input = Serial3.read();
     if(input == '6'){
       automode = false;
       car.setSpeed(ZERO);
@@ -108,41 +180,7 @@ void loop() {
     else {                        
         rotateTillFree();
     }
-  }
-  else if (automode == false){                  //Manual mode
-    char input = Serial3.read();
-    if (input == '0'){                          //Makes it go foward
-      car.setSpeed(fSpeed);
-      car.setAngle(0);
-    } 
-    else if (input == '1'){                     //Makes it go backwards
-      car.setSpeed(bSpeed);
-      car.setAngle(0);
-    } 
-    else if (input == '2'){                     //Makes it turn left
-      car.setSpeed(fSpeed);
-      car.setAngle(lDegrees);
-    }
-    else if (input == '3'){                     //Makes it turn right
-      car.setSpeed(fSpeed);
-      car.setAngle(rDegrees);
-    }
-    else if (input == '4'){                     //Makes it stop
-      car.setSpeed(0);
-      car.setAngle(0);
-    }
-    else if (input == '5'){                     //Auto Mode
-      automode = true;
-    }
-    else if (input == 'c'){                     //Send GPS
-    sendGPS();
-    }
-  }
 }
-
-
-
-//Automatic mode methods:
 /**
    Rotate the car at specified degrees with certain speed untill there is no obstacle
 */
@@ -154,6 +192,7 @@ void rotateTillFree() {
     bool hasReachedTargetDegrees = false;
     
     while (!hasReachedTargetDegrees) {
+      
       rotateOnSpot(degrees, CAR_SPEED);
       int currentHeading = car.getHeading();
       
@@ -212,6 +251,14 @@ void rotateOnSpot(int targetDegrees, int speed) {
   unsigned int initialHeading = car.getHeading(); //the initial heading we'll use as offset to calculate the absolute displacement
   int degreesTurnedSoFar = 0; //this variable will hold the absolute displacement from the beginning of the rotation
   while (abs(degreesTurnedSoFar) < abs(targetDegrees)) { //while absolute displacement hasn't reached the (absolute) target, keep turning
+    if(rfid.isCard()){                            //Detects mine        
+      detectingMine();
+      if (targetDegrees > 0) { //positive value means we should rotate clockwise
+        car.overrideMotorSpeed(speed, -speed); // left motors spin forward, right motors spin backward
+      } else { //rotate counter clockwise
+        car.overrideMotorSpeed(-speed, speed); // left motors spin backward, right motors spin forward
+      } 
+    }
     car.update(); //update to integrate the latest heading sensor readings
     int currentHeading = car.getHeading(); //in the scale of 0 to 360
     if ((targetDegrees < 0) && (currentHeading > initialHeading)) { //if we are turning left and the current heading is larger than the
@@ -335,9 +382,9 @@ String convertData(String rawString){
   String left1 = leftPart.substring(0, leftDigit - 2);
   String left2 = leftPart.substring(leftDigit-2);
   String newString = left1 + "." + left2 + rightPart;
-  while(newString.charAt(0) == '0'){
+  /*while(newString.charAt(0) == '0'){
       newString = newString.substring(1);
-  }
+  }*/
   
   if(lastChar == 'W' || lastChar == 'S'){
       newString = "-" + newString;
@@ -350,6 +397,10 @@ String convertData(String rawString){
 void sendGPS(){
   String gpsToBeSent = gpsLocation;
   int lengthOfChar = gpsToBeSent.length();
+  if(lengthOfChar==5){
+    gpsToBeSent = "c22.22222 011.111111/";  //temporary if not found
+  }
+  lengthOfChar = gpsToBeSent.length();
   for(int i = 0; i < lengthOfChar; i++){
     char shoot = gpsToBeSent.charAt(i);
     Serial3.write(shoot);
