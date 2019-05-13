@@ -51,6 +51,8 @@ before_install:
     - echo yes | sdkmanager "platforms;android-28"
     # Install Travis CI configuration for Arduino sketches
     - source <(curl -SLs https://raw.githubusercontent.com/adafruit/travis-ci-arduino/master/install.sh)
+    # Remove arduino libraries
+    - rm -rf $HOME/arduino_ide/libraries
 
 install:
     # Install Smartcar shield library (used by our sketch)
