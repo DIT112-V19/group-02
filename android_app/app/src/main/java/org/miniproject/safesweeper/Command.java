@@ -25,16 +25,22 @@ public class Command {
     public static byte[] speed (int speedValue) {
         String command = "zero";
 
+
         if (speedValue > SPEED_1 && speedValue < SPEED_2){ //go forward when seekbar is above 25%
             command = MOVE_FSPEED1;
+
         }else if (speedValue > SPEED_2 && speedValue < SPEED_3){ // increase speed
             command = MOVE_FSPEED2;
+
         }else if (speedValue > SPEED_3 && speedValue < SPEED_4){ // increase speed
             command = MOVE_FSPEED3;
+
         }else if (speedValue == SPEED_4){ //MAXIMUM SPEED INITIALIZED
             command = MOVE_FSPEED4;
-        }else if (speedValue == SPEED_0){ //stand still
+
+        }else if (speedValue >= 0 && speedValue < SPEED_1){ //stand still
             command = STAND_STILL;
+
         }else if (speedValue < SPEED_0){ //go backwards
             command = MOVE_BACKWARD;
         }
