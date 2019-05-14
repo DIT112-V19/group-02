@@ -48,8 +48,8 @@ before_script:
 
 before_install:
     - rm -rf $HOME/arduino_ide 
-    - rm -rf /home/travis/arduino_ide/libraries/TinyGPS
-    - rm -rf /home/travis/arduino_ide/libraries/RFID-RC522
+    - rm -rf $HOME/arduino_ide/libraries/TinyGPS
+    - rm -rf $HOME/arduino_ide/libraries/RFID-RC522
     # Install Android 9 SDK and accept its user agreement
     - echo yes | sdkmanager "platforms;android-28"
     # Install Travis CI configuration for Arduino sketches
