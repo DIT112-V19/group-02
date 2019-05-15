@@ -104,13 +104,16 @@
 
     <TextView
         android:id="@+id/connectionTextView"
-        android:layout_width="wrap_content"
+        android:layout_width="260dp"
         android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/locationText"
         android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
+        android:layout_centerInParent="true"
         android:layout_marginTop="56dp"
+        android:layout_marginBottom="52dp"
         android:fontFamily="monospace"
         android:text="text"
+        android:textAlignment="center"
         android:textColor="#b61717"
         android:textSize="25sp" />
 
@@ -126,10 +129,12 @@
     <TextView
         android:id="@+id/locationText"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="131dp"
+        android:layout_above="@+id/textView1"
         android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="108dp"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="48dp"
+        android:layout_marginBottom="17dp"
         android:textColor="#606060"
         android:textSize="25sp" />
 
