@@ -338,11 +338,12 @@ public class MainActivity extends AppCompatActivity {
     public String extractLocation(String locationStr){
         String firstText = locationStr.substring(0,locationStr.indexOf(" "));
         String secondText = locationStr.substring(locationStr.indexOf(" ") + 1);
+        String result = "             Mine Location       " +"\n";
 
         firstText = convertLocation(firstText);
         secondText = convertLocation(secondText);
 
-        return firstText + ", " + secondText;
+        return result + firstText + ", " + secondText + "      ";
     }
 
     public String convertLocation(String text){ //Eyuell
