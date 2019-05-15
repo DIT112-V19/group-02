@@ -261,25 +261,30 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void writeToCar(String command) {
+    private boolean writeToCar(String command) {
         try {
             outputStream.write(command.getBytes());
+            return true;
         } catch (IOException exc) {
             Log.e("IOException: ", exc.getMessage());
+            return false;
         }
     }
 
-    private void writeToCarTest(byte[] commandTest) {
+    private boolean writeToCarTest(byte[] commandTest) {
         try {
             outputStream.write(commandTest);
+            return true;
         } catch (IOException exc) {
             Log.e("IOException: ", exc.getMessage());
+            return false;
         }
     }
 
-    private void handleInput(String input) {
+    private int handleInput(String input) {
         if(input.matches(MINE_REGEX)) {
             showMineDetected();
+            return 2;
         }
 
         else if(input.matches(LOCATION_REGEX)){
@@ -289,6 +294,7 @@ public class MainActivity extends AppCompatActivity {
             String locationStr  = input.substring(1, lastIndex);
             locationStr = extractLocation(locationStr);
             showLocation(locationStr);
+            return 3;
 
             /* if we need the coordinates as double
             String latitudeStr = input.substring(1, indexOfSpace);
@@ -297,9 +303,10 @@ public class MainActivity extends AppCompatActivity {
             double lng = convertToDouble(longitudeStr);
             */
         }
+        return 0;
     }
 
-    private double convertToDouble(String str){
+    public double convertToDouble(String str){
         if(str.matches(DOUBLE_WITH_DECIMALS_REGEX)){
             return Double.parseDouble(str);
         }else{
