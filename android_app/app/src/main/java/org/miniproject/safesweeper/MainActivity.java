@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String ACKNOWLEDGE_MINE = "m";
 
     //inputs from car
-    public static final String LOCATION_REGEX = "c\\d+\\.\\d+\\s\\d+\\.\\d+/";
+    public static final String LOCATION_REGEX = "c-?\\d+\\.\\d+\\s-?\\d+\\.\\d+/";
     public static final String MINE_REGEX = "m";
     public static final String LAT_LNG_SEPARATOR = "\\s";
     public static final String END_OF_INPUT = "/";
@@ -225,6 +225,8 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View v) {
                         writeToCar(ACKNOWLEDGE_MINE);
+                        connectionTextView.setText("");
+                        locationText.setText("");
                     }
                 });
 
@@ -285,6 +287,7 @@ public class MainActivity extends AppCompatActivity {
             int lastIndex = input.indexOf(END_OF_INPUT);
 
             String locationStr  = input.substring(1, lastIndex);
+            locationStr = extractLocation(locationStr);
             showLocation(locationStr);
 
             /* if we need the coordinates as double
@@ -330,5 +333,47 @@ public class MainActivity extends AppCompatActivity {
                 connectionTextView.setText(str);
             }
         });
+    }
+
+    public String extractLocation(String locationStr){
+        String firstText = locationStr.substring(0,locationStr.indexOf(" "));
+        String secondText = locationStr.substring(locationStr.indexOf(" ") + 1);
+
+        firstText = convertLocation(firstText);
+        secondText = convertLocation(secondText);
+
+        return firstText + ", " + secondText;
+    }
+
+    public String convertLocation(String text){ //Eyuell
+        String direction;
+        if(text.charAt(0) == '-'){
+            if(text.indexOf(".") == 3){
+                direction = "S";
+            } else {
+                direction = "W";
+            }
+        } else {
+            if(text.indexOf(".") == 2){
+                direction = "N";
+            } else {
+                direction = "E";
+            }
+        }
+
+        if(text.charAt(0) == '-')
+            text = text.substring(1);
+
+        double numFormat = Double.parseDouble(text);
+        int degree = (int) numFormat;
+        numFormat = ((numFormat - degree)*100.0);
+        int minute = (int) numFormat;
+        numFormat = ((numFormat - minute)*100.0);
+
+        numFormat = numFormat * 10;
+        numFormat = Math.round(numFormat);
+        numFormat = numFormat / 10.0;
+
+        return degree + "° " + minute + "′ " + numFormat + "″ " + direction;
     }
 }
