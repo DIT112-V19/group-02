@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String ACKNOWLEDGE_MINE = "m";
 
     //inputs from car
-    public static final String LOCATION_REGEX = "c-?\\d+\\.\\d+\\s-?\\d+\\.\\d+/";
+    public static final String LOCATION_REGEX = "c-?\\d+\\.\\d+\\s-?\\d+\\.\\d+/";  //Eyuell
     public static final String MINE_REGEX = "m";
     public static final String LAT_LNG_SEPARATOR = "\\s";
     public static final String END_OF_INPUT = "/";
