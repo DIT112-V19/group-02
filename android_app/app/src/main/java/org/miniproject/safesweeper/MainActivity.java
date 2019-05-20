@@ -342,10 +342,11 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    //Preparing text to be displayed on location view
     public String extractLocation(String locationStr){
-        String firstText = locationStr.substring(0,locationStr.indexOf(" "));
-        String secondText = locationStr.substring(locationStr.indexOf(" ") + 1);
-        String result = "             Mine Location       " +"\n";
+        String firstText = locationStr.substring(0,locationStr.indexOf(LAT_LNG_SEPARATOR));
+        String secondText = locationStr.substring(locationStr.indexOf(LAT_LNG_SEPARATOR) + 1);
+        String result = "\n" + "             Mine Location       " +"\n";   //not to conflict when shown together with 'detected' text
 
         firstText = convertLocation(firstText);
         secondText = convertLocation(secondText);
@@ -353,7 +354,8 @@ public class MainActivity extends AppCompatActivity {
         return result + firstText + ", " + secondText + "      ";
     }
 
-    public String convertLocation(String text){ //Eyuell
+    //to display the location in DMS (degree, minute, second) format
+    public String convertLocation(String text){
         String direction;
         if(text.charAt(0) == '-'){
             if(text.indexOf(".") == 3){
