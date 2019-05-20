@@ -1,15 +1,21 @@
 #include <Smartcar.h>
 #include <SPI.h>
-#include <RFID.h>   
+#include <RFID.h> 
 
 //GPS     
 String data = "";
 boolean Mark_Start = false;
 boolean valid = false;
-String GGAUTCtime,GGAlatitude,GGAlongitude,GPStatus,SatelliteNum,HDOPfactor,Height,
-PositionValid,RMCUTCtime,RMClatitude,RMClongitude,Speed,Direction,Date,Declination,Mode;
+const long arraySize = 500;  //if needed, the size can be increased
+long savedLocations = 0;
+String coordinates[500];    
+String GGAUTCtime, GGAlatitude, GGAlongitude, GPStatus, SatelliteNum, HDOPfactor, Height,
+PositionValid, RMCUTCtime, RMClatitude, RMClongitude, Speed, Direction, Date, Declination, Mode;
+const String NOT_FOUND = "Not yet identified.";
+const String NOT_WORKING = "gps module connection problem.";
+const String TEST_VALUE = "c-83.582704 -142.186889/";
+String gpsLocation = NOT_FOUND;
 
-String gpsLocation = "c0 0/";
 
 //Odometer:
 const unsigned short LEFT_ODOMETER_PIN = 2;
@@ -102,6 +108,7 @@ void loop() {
 }
 
 void detectingMine(){
+  if(isNewLocation()){
     car.setSpeed(reduceSpeed);
     car.setSpeed(ZERO);
     Serial3.write('m');
@@ -112,6 +119,7 @@ void detectingMine(){
     while(command != 'm'){
       command = Serial3.read();
     }
+  }  
 }
 
 void manualMode(){
@@ -165,8 +173,6 @@ void manualMode(){
     sendGPS();
     }
 }
-
-
 
 //Automatic mode methods:
 
@@ -280,7 +286,7 @@ void rotateOnSpot(int targetDegrees, int speed) {
 //
 void lookForGPS(){
   if (Serial1.available()> 0){
-    gpsLocation = "c0 0/";
+    gpsLocation = NOT_FOUND;
     
     if(Mark_Start){
       data = reader();
@@ -350,6 +356,8 @@ void lookForGPS(){
       //Serial.println("capture");
       Mark_Start = true;
     }
+  }else {
+    gpsLocation = NOT_WORKING;
   }
 }
 
@@ -401,9 +409,14 @@ String convertData(String rawString){
 void sendGPS(){
   String gpsToBeSent = gpsLocation;
   int lengthOfChar = gpsToBeSent.length();
-  if(lengthOfChar==5){
-    gpsToBeSent = "c22.22222 011.111111/";  //temporary if not found
+  if(gpsToBeSent.equals(NOT_FOUND)){
+    gpsToBeSent = TEST_VALUE;  //for testing purpose
+    //gpsToBeSent = "x";
+  } else if (gpsToBeSent.equals(NOT_WORKING)){
+    gpsToBeSent = ""; //for testing purpose
+    //gpsToBeSent = "y";
   }
+    
   lengthOfChar = gpsToBeSent.length();
   for(int i = 0; i < lengthOfChar; i++){
     char shoot = gpsToBeSent.charAt(i);
@@ -413,7 +426,24 @@ void sendGPS(){
 
 void handleLocation(){
   Serial3.end();
-  lookForGPS();                                 
+  lookForGPS();                             
   Serial3.begin(BAUD_RATE);
   sendGPS();
+}
+
+boolean isNewLocation(){
+  if(gpsLocation != NOT_FOUND && gpsLocation != NOT_WORKING && /*gpsLocation != TEST_VALUE && */ !isInArray()){
+    if(savedLocations < arraySize && gpsLocation != TEST_VALUE)  //test value active only for test purpose
+      coordinates[savedLocations++] = gpsLocation;
+    return true;
+  } else
+    return false;
+}
+
+boolean isInArray(){
+  for (int i = 0; i < savedLocations; i++){
+    if(coordinates[i].equals(gpsLocation))
+      return true; 
+  }
+  return false;
 }
