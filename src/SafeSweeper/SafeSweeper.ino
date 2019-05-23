@@ -105,10 +105,11 @@ void loop() {
   else if (automode == false){                  //Manual mode
     manualMode();
   }
+  //Serial.println(gpsLocation);          //for testing
 }
 
 void detectingMine(){
-  if(isNewLocation()){
+  //if(isNewLocation()){  //uncomment if not testing
     car.setSpeed(reduceSpeed);
     car.setSpeed(ZERO);
     Serial3.write('m');
@@ -123,7 +124,7 @@ void detectingMine(){
     delay(500);
     car.setSpeed(reduceSpeed);
     car.setSpeed(ZERO);
-  }  
+  //}    //uncomment if not testing
 }
 
 void manualMode(){
@@ -360,7 +361,7 @@ void lookForGPS(){
       //Serial.println("capture");
       Mark_Start = true;
     }
-  }else {
+  } else {
     gpsLocation = NOT_WORKING;
   }
 }
@@ -415,12 +416,11 @@ void sendGPS(){
   int lengthOfChar = gpsToBeSent.length();
   if(gpsToBeSent.equals(NOT_FOUND)){
     gpsToBeSent = TEST_VALUE;  //for testing purpose
-    //gpsToBeSent = "x";
+    //gpsToBeSent = "x";    //uncomment if not testing
   } else if (gpsToBeSent.equals(NOT_WORKING)){
-    gpsToBeSent = ""; //for testing purpose
-    //gpsToBeSent = "y";
+    gpsToBeSent = "y";    //uncomment if not testing
   }
-    
+  
   lengthOfChar = gpsToBeSent.length();
   for(int i = 0; i < lengthOfChar; i++){
     char shoot = gpsToBeSent.charAt(i);
@@ -428,7 +428,7 @@ void sendGPS(){
   }
 }
 
-void handleLocation(){
+void handleLocation(){  //only when mine detected
   Serial3.end();
   lookForGPS();                             
   Serial3.begin(BAUD_RATE);
@@ -436,7 +436,7 @@ void handleLocation(){
 }
 
 boolean isNewLocation(){
-  if(gpsLocation != NOT_FOUND && gpsLocation != NOT_WORKING && /*gpsLocation != TEST_VALUE && */ !isInArray()){
+  if(gpsLocation != NOT_FOUND && gpsLocation != NOT_WORKING /*&& gpsLocation != TEST_VALUE && !isInArray()*/){  //uncomment if out in field
     if(savedLocations < arraySize && gpsLocation != TEST_VALUE)  //test value active only for test purpose
       coordinates[savedLocations++] = gpsLocation;
     return true;
