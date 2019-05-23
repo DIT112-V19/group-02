@@ -40,18 +40,14 @@ public class MainActivity extends AppCompatActivity {
     public static final int STEERING_DEFAULT = 50;
 
     //Car commands
-    public static final String MOVE_FORWARD = "0";
-    public static final String STAND_STILL = "4";
-    public static final String MOVE_BACKWARD = "1";
-    public static final String AUTOMATIC_MODE = "5";
+    public static final String STAND_STILL = "0";
+    public static final String AUTOMATIC_MODE = "7";
     public static final String MANUAL_MODE = "6";
-    public static final String STEER_RIGHT = "3";
-    public static final String STEER_LEFT = "2";
     public static final String GET_LOCATION = "c";
     public static final String ACKNOWLEDGE_MINE = "m";
 
     //inputs from car
-    public static final String LOCATION_REGEX = "c\\d+\\.\\d+\\s\\d+\\.\\d+/";
+    public static final String LOCATION_REGEX = "c-?\\d+\\.\\d+\\s-?\\d+\\.\\d+/";
     public static final String MINE_REGEX = "m";
     public static final String LAT_LNG_SEPARATOR = "\\s";
     public static final String END_OF_INPUT = "/";
@@ -61,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
     private int speedValue;
     private int steerValue;
     private String command;
+    private byte[] commandTest;
 
     private String macAddress;
     BluetoothAdapter mBluetooth = null;
@@ -158,15 +155,8 @@ public class MainActivity extends AppCompatActivity {
                         steeringBar.getProgress();
                         speedValue = THROTTLE_MIN + progress;
                         throttleText.setText(speedValue + "");
-
-                        if (speedValue > 25) { //go forward when seekbar is above 25%
-                            command = MOVE_FORWARD;
-                        } else if (speedValue == 0) { //stand still
-                            command = STAND_STILL;
-                        } else if (speedValue < 0) { //go backwards
-                            command = MOVE_BACKWARD;
-                        }
-                        writeToCar(command);
+                        commandTest = Command.speed(speedValue);
+                        writeToCarTest(commandTest);
                     }
 
 
@@ -206,16 +196,10 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                         steerValue = STEERING_MIN + progress;
-                        throttleText.setText(steerValue + "");
+                        steeringText.setText(steerValue + "");
 
-                        if (steerValue > 0) { //go right
-                            command = STEER_RIGHT;
-                        } else if (steerValue < 0) { //go left
-                            command = STEER_LEFT;
-                        } else { //stop
-                            command = STAND_STILL;
-                        }
-                        writeToCar(command);
+                        commandTest = Command.steer(steerValue);
+                        writeToCarTest(commandTest);
                     }
 
                     @Override
@@ -241,6 +225,8 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View v) {
                         writeToCar(ACKNOWLEDGE_MINE);
+                        connectionTextView.setText("");
+                        locationText.setText("");
                     }
                 });
 
@@ -275,17 +261,30 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void writeToCar(String command) {
+    private boolean writeToCar(String command) {
         try {
             outputStream.write(command.getBytes());
+            return true;
         } catch (IOException exc) {
             Log.e("IOException: ", exc.getMessage());
+            return false;
         }
     }
 
-    private void handleInput(String input) {
+    private boolean writeToCarTest(byte[] commandTest) {
+        try {
+            outputStream.write(commandTest);
+            return true;
+        } catch (IOException exc) {
+            Log.e("IOException: ", exc.getMessage());
+            return false;
+        }
+    }
+
+    private int handleInput(String input) {
         if(input.matches(MINE_REGEX)) {
             showMineDetected();
+            return 2;
         }
 
         else if(input.matches(LOCATION_REGEX)){
@@ -293,7 +292,9 @@ public class MainActivity extends AppCompatActivity {
             int lastIndex = input.indexOf(END_OF_INPUT);
 
             String locationStr  = input.substring(1, lastIndex);
+            locationStr = extractLocation(locationStr);
             showLocation(locationStr);
+            return 3;
 
             /* if we need the coordinates as double
             String latitudeStr = input.substring(1, indexOfSpace);
@@ -302,9 +303,10 @@ public class MainActivity extends AppCompatActivity {
             double lng = convertToDouble(longitudeStr);
             */
         }
+        return 0;
     }
 
-    private double convertToDouble(String str){
+    public double convertToDouble(String str){
         if(str.matches(DOUBLE_WITH_DECIMALS_REGEX)){
             return Double.parseDouble(str);
         }else{
@@ -338,5 +340,50 @@ public class MainActivity extends AppCompatActivity {
                 connectionTextView.setText(str);
             }
         });
+    }
+
+    //Preparing text to be displayed on location view
+    public String extractLocation(String locationStr){
+        String firstText = locationStr.substring(0,locationStr.indexOf(LAT_LNG_SEPARATOR));
+        String secondText = locationStr.substring(locationStr.indexOf(LAT_LNG_SEPARATOR) + 1);
+        String result = "\n" + "             Mine Location       " +"\n";   //not to conflict when shown together with 'detected' text
+
+        firstText = convertLocation(firstText);
+        secondText = convertLocation(secondText);
+
+        return result + firstText + ", " + secondText + "      ";
+    }
+
+    //to display the location in DMS (degree, minute, second) format
+    public String convertLocation(String text){
+        String direction;
+        if(text.charAt(0) == '-'){
+            if(text.indexOf(".") == 3){
+                direction = "S";
+            } else {
+                direction = "W";
+            }
+        } else {
+            if(text.indexOf(".") == 2){
+                direction = "N";
+            } else {
+                direction = "E";
+            }
+        }
+
+        if(text.charAt(0) == '-')
+            text = text.substring(1);
+
+        double numFormat = Double.parseDouble(text);
+        int degree = (int) numFormat;
+        numFormat = ((numFormat - degree)*100.0);
+        int minute = (int) numFormat;
+        numFormat = ((numFormat - minute)*100.0);
+
+        numFormat = numFormat * 10;
+        numFormat = Math.round(numFormat);
+        numFormat = numFormat / 10.0;
+
+        return degree + "° " + minute + "′ " + numFormat + "″ " + direction;
     }
 }
