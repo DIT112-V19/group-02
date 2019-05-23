@@ -121,6 +121,7 @@ void detectingMine(){
     }
     car.setSpeed(fSpeed);
     delay(500);
+    car.setSpeed(reduceSpeed);
     car.setSpeed(ZERO);
   }  
 }
