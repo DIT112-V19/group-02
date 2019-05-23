@@ -1,4 +1,5 @@
-## SafeSweeper (Group-02) [![Build Status](https://travis-ci.org/DIT112-V19/group-02.svg?branch=master)](https://travis-ci.org/DIT112-V19/group-02)
+## SafeSweeper (Group-02) [![Build Status](https://travis-ci.org/DIT112-V19/group-02.svg?branch=master)](https://travis-ci.org/DIT112-V19/group-02) [![codecov.io](http://codecov.io/github/DIT112-V19/group-02/coverage.svg?branch=master)](http://codecov.io/github/DIT112-V19/group-02?branch=master)
+
 *A Cheap and Safe way of Disabling Land Mines*
 ### Who?
 We are seven software developers (listed at the bottom) aimed at delivering a product to our client team (listed below) who are looking for an innovative car that could add value to the client and the society as a whole.
