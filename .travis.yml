@@ -67,6 +67,9 @@ script:
     - ./gradlew build --stacktrace
     # Run the Android app's unit tests
     - ./gradlew test --info
+    - ./gradlew build jacocoTestReport
+    - ./gradlew createDebugCoverageReport
+    - ./gradlew connectedCheck
     # Run the Android app's instrumented tests
     - ./gradlew connectedAndroidTest
     # Build all .ino files for Arduino Mega
