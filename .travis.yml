@@ -9,6 +9,7 @@ env:
         # Set the minimum Android API to support
         # Note: Not all of them work well with Travis
         - ANDROID_TARGET=android-22
+        - CODECOV_TOKEN="f89a63fe-9d43-4f05-8c7b-e0d78f0ebcfc"
 
 before_cache:
     - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
@@ -75,3 +76,7 @@ script:
     # Build all .ino files for Arduino Mega
     - cd $TRAVIS_BUILD_DIR/src/SafeSweeper
     - build_platform mega2560
+    
+after_success:
+    # coverage report
+    - bash <(curl -s https://codecov.io/bash)
