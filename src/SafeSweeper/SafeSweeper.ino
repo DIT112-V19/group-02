@@ -119,6 +119,10 @@ void detectingMine(){
     while(command != 'm'){
       command = Serial3.read();
     }
+    car.setSpeed(fSpeed);
+    delay(500);
+    car.setSpeed(reduceSpeed);
+    car.setSpeed(ZERO);
   }  
 }
 
