@@ -82,6 +82,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
         macAddress = getIntent().getStringExtra("MAC");
 
+        textView1 = (TextView) findViewById(R.id.textview);
         throttleBar = (SeekBar) findViewById(R.id.throttleBar);
         steeringBar = (SeekBar) findViewById(R.id.steeringBar);
         throttleText = (TextView) findViewById(R.id.throttleText);
@@ -357,7 +358,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
             @Override
             public void run() {
                 locationText.setText("");   //in case a coordinate was displaying, to clear it
-                connectionTextView.setText("MINE DETECTED!");
+                connectionTextView.setText("MINE DETECTED!   ");
             }
         });
     }
@@ -376,7 +377,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     public String extractLocation(String locationStr) {
         String firstText = locationStr.substring(0, locationStr.indexOf(LAT_LNG_SEPARATOR));
         String secondText = locationStr.substring(locationStr.indexOf(LAT_LNG_SEPARATOR) + 1);
-        String result = "\n" + "             Mine Location       " + "\n";   //not to conflict when shown together with 'detected' text
+        String result = "\n" + "\n" + "             Mine Location   " + "\n";   //not to conflict when shown together with 'detected' text
 
         firstText = convertLocation(firstText);
         secondText = convertLocation(secondText);
