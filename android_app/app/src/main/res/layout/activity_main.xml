@@ -34,7 +34,7 @@
         android:layout_width="273dp"
         android:layout_height="115dp"
         android:layout_alignParentBottom="true"
-        android:layout_marginStart="300dp"
+        android:layout_marginStart="275dp"
         android:max="100"
         android:maxWidth="50dp"
         android:progress="50"
@@ -97,22 +97,22 @@
 
     <TextView
         android:id="@+id/throttleText"
-        android:layout_width="68dp"
-        android:layout_height="74dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_below="@id/menuBtn"
         android:layout_alignRight="@id/menuBtn"
         android:layout_marginTop="40dp"
-        android:text="00"
+        android:text="0"
         android:textColor="@android:color/holo_green_light"
         android:textSize="30sp" />
 
     <TextView
         android:id="@+id/steeringText"
-        android:layout_width="69dp"
-        android:layout_height="57dp"
+        android:layout_width="wrap_content"
+        android:layout_height="75dp"
         android:layout_alignParentBottom="true"
         android:layout_toEndOf="@id/steeringBar"
-        android:text="00"
+        android:text="0"
         android:textColor="@android:color/holo_green_light"
         android:textSize="30sp" />
 
@@ -129,7 +129,7 @@
         android:text="text"
         android:textAlignment="center"
         android:textColor="#FFC107"
-        android:textSize="25sp" />
+        android:textSize="22sp" />
 
     <TextView
         android:id="@+id/locationText"
@@ -138,6 +138,6 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"
         android:textColor="#0589C9"
-        android:textSize="25sp" />
+        android:textSize="20sp" />
 
 </RelativeLayout>
