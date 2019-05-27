@@ -9,12 +9,12 @@ import android.os.Bundle;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.PopupMenu;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,17 +25,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.UUID;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener{
 
-    Button getLocationBtn;
-    Button mineBtn;
+    Button mineBtn, menuBtn, boundaryBtn, getLocationBtn;
     TextView textView1;
-    SeekBar throttleBar;
-    SeekBar steeringBar;
-    TextView throttleText;
-    TextView steeringText;
-    TextView connectionTextView;
-    TextView locationText;
+    SeekBar throttleBar, steeringBar;
+    TextView throttleText, steeringText, locationText, connectionTextView;
     ToggleButton steeringToggle;
 
     public static final int THROTTLE_MIN = -30;
@@ -84,12 +79,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
         macAddress = getIntent().getStringExtra("MAC");
 
-        textView1 = (TextView) findViewById(R.id.textView1);
         throttleBar = (SeekBar) findViewById(R.id.throttleBar);
         steeringBar = (SeekBar) findViewById(R.id.steeringBar);
         throttleText = (TextView) findViewById(R.id.throttleText);
@@ -99,12 +91,23 @@ public class MainActivity extends AppCompatActivity {
         steeringToggle = (ToggleButton) findViewById(R.id.steeringToggle);
         getLocationBtn = (Button) findViewById(R.id.getLocationBtn);
         mineBtn = (Button) findViewById(R.id.mineBtn);
+        menuBtn = (Button) findViewById(R.id.menuBtn);
+        boundaryBtn = (Button) findViewById(R.id.boundaryBtn);
+
+        menuBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PopupMenu popup = new PopupMenu(MainActivity.this, v);
+                popup.setOnMenuItemClickListener(MainActivity.this);
+                popup.inflate(R.menu.popup_menu);
+                popup.show();
+            }
+        });
 
         //Start task to connect with cars bluetooth asynchronously
         new ConnectBT().execute();
 
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) { //menu created
@@ -113,25 +116,7 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {   //when items of menu are selected
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();  //get the id of item selected
-
-        switch (id){
-            case R.id.action_addBoundary:   //id add date is selected
-                openAddBoundaryActivity();
-                break;
-            default:    //R.id.action_settings or other
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    private class ConnectBT extends AsyncTask<Void, Void, Void>
-    {
+    private class ConnectBT extends AsyncTask<Void, Void, Void> {
         private boolean ConnectSuccess = true; //if it's here, it's almost connected
 
         @Override
@@ -228,9 +213,7 @@ public class MainActivity extends AppCompatActivity {
                 });
 
 
-                steeringBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
-
-                { //Steering controls
+                steeringBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() { //Steering controls
                     @Override
                     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                         steerValue = STEERING_MIN + progress;
@@ -321,16 +304,14 @@ public class MainActivity extends AppCompatActivity {
 
     private int handleInput(String input) {
 
-        if(input.matches(MINE_REGEX)) {
+        if (input.matches(MINE_REGEX)) {
             showMineDetected();
             return 2;
-        }
-
-        else if(input.matches(LOCATION_REGEX)){
+        } else if (input.matches(LOCATION_REGEX)) {
             int indexOfSpace = input.indexOf(LAT_LNG_SEPARATOR);
             int lastIndex = input.indexOf(END_OF_INPUT);
 
-            String locationStr  = input.substring(1, lastIndex);
+            String locationStr = input.substring(1, lastIndex);
 
             locationStr = extractLocation(locationStr);
             showLocation(locationStr);
@@ -342,21 +323,21 @@ public class MainActivity extends AppCompatActivity {
             double lat = convertToDouble(latitudeStr);
             double lng = convertToDouble(longitudeStr);
             */
-        } else if(input.equals("x")){
+        } else if (input.equals("x")) {
             String locationInfo = "\n" + "\n" + "Fetching from satellite (Try Again)    ";
             showLocation(locationInfo);
 
-        } else if (input.equals("y")){
+        } else if (input.equals("y")) {
             String locationInfo = "\n" + "\n" + "Inactive GPS-Module             ";
             showLocation(locationInfo);
         }
         return 0;
     }
 
-    public double convertToDouble(String str){
-        if(str.matches(DOUBLE_WITH_DECIMALS_REGEX)){
+    public double convertToDouble(String str) {
+        if (str.matches(DOUBLE_WITH_DECIMALS_REGEX)) {
             return Double.parseDouble(str);
-        }else{
+        } else {
             return 0.0;
         }
     }
@@ -378,7 +359,8 @@ public class MainActivity extends AppCompatActivity {
                 locationText.setText("");   //in case a coordinate was displaying, to clear it
                 connectionTextView.setText("MINE DETECTED!");
             }
-        });    }
+        });
+    }
 
     public void setConnectionTextView(String msg) {
         final String str = msg;
@@ -391,10 +373,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //Preparing text to be displayed on location view
-    public String extractLocation(String locationStr){
-        String firstText = locationStr.substring(0,locationStr.indexOf(LAT_LNG_SEPARATOR));
+    public String extractLocation(String locationStr) {
+        String firstText = locationStr.substring(0, locationStr.indexOf(LAT_LNG_SEPARATOR));
         String secondText = locationStr.substring(locationStr.indexOf(LAT_LNG_SEPARATOR) + 1);
-        String result = "\n" + "             Mine Location       " +"\n";   //not to conflict when shown together with 'detected' text
+        String result = "\n" + "             Mine Location       " + "\n";   //not to conflict when shown together with 'detected' text
 
         firstText = convertLocation(firstText);
         secondText = convertLocation(secondText);
@@ -403,30 +385,30 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //to display the location in DMS (degree, minute, second) format
-    public String convertLocation(String text){
+    public String convertLocation(String text) {
         String direction;
-        if(text.charAt(0) == '-'){
-            if(text.indexOf(".") == 3){
+        if (text.charAt(0) == '-') {
+            if (text.indexOf(".") == 3) {
                 direction = "S";
             } else {
                 direction = "W";
             }
         } else {
-            if(text.indexOf(".") == 2){
+            if (text.indexOf(".") == 2) {
                 direction = "N";
             } else {
                 direction = "E";
             }
         }
 
-        if(text.charAt(0) == '-')
+        if (text.charAt(0) == '-')
             text = text.substring(1);
 
         double numFormat = Double.parseDouble(text);
         int degree = (int) numFormat;
-        numFormat = ((numFormat - degree)*100.0);
+        numFormat = ((numFormat - degree) * 100.0);
         int minute = (int) numFormat;
-        numFormat = ((numFormat - minute)*100.0);
+        numFormat = ((numFormat - minute) * 100.0);
 
         numFormat = numFormat * 10;
         numFormat = Math.round(numFormat);
@@ -435,8 +417,59 @@ public class MainActivity extends AppCompatActivity {
         return degree + "° " + minute + "′ " + numFormat + "″ " + direction;
     }
 
+    private String limitDigit(String input) {
+        int last = input.length() - 1;
+        int decimal = input.indexOf(".");
 
-    public void openAddBoundaryActivity(){
+        if ((last - decimal) > 7)
+            return input.substring(0, (decimal + 7));
+        else
+            return input;
+    }
+
+    private boolean longitudeDigit(String lat) {
+        if (lat.charAt(0) == '-')
+            lat = lat.substring(1);
+
+        if (lat.indexOf(".") > 3)
+            return true;
+        else
+            return false;
+    }
+
+    private boolean latitudeDigit(String lat) {
+        if (lat.charAt(0) == '-')
+            lat = lat.substring(1);
+
+        if (lat.indexOf(".") > 2)
+            return true;
+        else
+            return false;
+    }
+
+    public boolean onMenuItemClick(MenuItem item) {
+        Toast.makeText(this, "Selected Item: " +item.getTitle(), Toast.LENGTH_SHORT).show();
+        switch (item.getItemId()) {
+            /*case R.id.home_item:
+                Intent intentH = new Intent(this, HomeActivity.class);
+                startActivity(intentH);
+                return true;*/
+            case R.id.map_item:
+                //Intent intent = new Intent(this, HomeActivity.class);
+                return true;
+            case R.id.bluetooth_item:
+                Intent intentB = new Intent(this, BluetoothActivity.class);
+                startActivity(intentB);
+                return true;
+            case R.id.control_item:
+                Toast.makeText(this,"You are already on this page!", Toast.LENGTH_SHORT).show();
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    public void boundary(View v) {
         final AlertDialog.Builder mBuilder = new AlertDialog.Builder(this);
         View mView = getLayoutInflater().inflate(R.layout.boundary_input, null);
         mBuilder.setCancelable(true);
@@ -453,9 +486,9 @@ public class MainActivity extends AppCompatActivity {
         final AlertDialog dialog = mBuilder.create();
         dialog.show();
 
-        applyButton.setOnClickListener(new View.OnClickListener(){
+        applyButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v){
+            public void onClick(View v) {
                 boolean notComplete = false;
                 String lat1 = lat1Input.getText().toString().trim();
                 String lat2 = lat2Input.getText().toString().trim();
@@ -467,51 +500,51 @@ public class MainActivity extends AppCompatActivity {
                 lon1 = limitDigit(lon1);
                 lon2 = limitDigit(lon2);
 
-                if(lat1.isEmpty()){
+                if (lat1.isEmpty()) {
                     lat1Input.setError("Field is empty");
                     notComplete = true;
-                } else if (!lat1.matches(COORDINATE_REGEX)){
+                } else if (!lat1.matches(COORDINATE_REGEX)) {
                     lat1Input.setError("use format of 00.0000000");
                     notComplete = true;
-                } else if (latitudeDigit(lat1)){
+                } else if (latitudeDigit(lat1)) {
                     lat1Input.setError("latitude should be two digits max before decimal");
                     notComplete = true;
                 }
 
-                if(lat2.isEmpty()){
+                if (lat2.isEmpty()) {
                     lat2Input.setError("Field is empty");
                     notComplete = true;
-                } else if (!lat2.matches(COORDINATE_REGEX)){
+                } else if (!lat2.matches(COORDINATE_REGEX)) {
                     lat2Input.setError("use format of 00.0000000");
                     notComplete = true;
-                } else if (latitudeDigit(lat2)){
+                } else if (latitudeDigit(lat2)) {
                     lat2Input.setError("latitude should be two digits max before decimal");
                     notComplete = true;
                 }
 
-                if(lon1.isEmpty()){
+                if (lon1.isEmpty()) {
                     lon1Input.setError("Field is empty");
                     notComplete = true;
-                } else if (!lon1.matches(COORDINATE_REGEX)){
+                } else if (!lon1.matches(COORDINATE_REGEX)) {
                     lon1Input.setError("use format of 000.0000000");
                     notComplete = true;
-                } else if (longitudeDigit(lon1)){
+                } else if (longitudeDigit(lon1)) {
                     lon1Input.setError("latitude should be three digits max before decimal");
                     notComplete = true;
                 }
 
-                if(lon2.isEmpty()){
+                if (lon2.isEmpty()) {
                     lon2Input.setError("Field is empty");
                     notComplete = true;
-                } else if (!lon2.matches(COORDINATE_REGEX)){
+                } else if (!lon2.matches(COORDINATE_REGEX)) {
                     lon2Input.setError("use format of 000.0000000");
                     notComplete = true;
-                } else if (longitudeDigit(lon2)){
+                } else if (longitudeDigit(lon2)) {
                     lon2Input.setError("latitude should be three digits max before decimal");
                     notComplete = true;
                 }
 
-                if(!notComplete){
+                if (!notComplete) {
                     lat1Text = lat1;
                     lat2Text = lat2;
                     lon1Text = lon1;
@@ -521,42 +554,11 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-
-        cancelButton.setOnClickListener(new View.OnClickListener(){
+        cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v){
+            public void onClick(View v) {
                 dialog.cancel();
             }
         });
-    }
-
-    private String limitDigit(String input){
-        int last = input.length()-1;
-        int decimal = input.indexOf(".");
-
-        if((last - decimal) > 7)
-            return input.substring(0,(decimal + 7));
-        else
-            return input;
-    }
-
-    private boolean longitudeDigit(String lat){
-        if(lat.charAt(0) == '-')
-            lat = lat.substring(1);
-
-        if(lat.indexOf(".") > 3)
-            return true;
-        else
-            return false;
-    }
-
-    private boolean latitudeDigit(String lat){
-        if(lat.charAt(0) == '-')
-            lat = lat.substring(1);
-
-        if(lat.indexOf(".") > 2)
-            return true;
-        else
-            return false;
     }
 }

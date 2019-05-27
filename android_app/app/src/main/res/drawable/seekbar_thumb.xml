@@ -5,7 +5,7 @@
     android:thickness="4dp"
     android:useLevel="false"
     android:tint="#ad1457">
-    <corners android:radius="8dp"
+    <corners android:radius="16dp"
         android:splitTrack="false"/>
     <solid
         android:color="#ad1457"
@@ -14,3 +14,4 @@
         android:width="32dp"
         android:height="32dp" />
 </shape>
+

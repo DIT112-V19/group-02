@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item
+        android:id="@+id/control_item"
+        android:title="Control Hub" />
+    <item android:id="@+id/map_item"
+        android:title="Map" />
+    <item
+        android:id="@+id/bluetooth_item"
+        android:title="Bluetooth Connection" />
+</menu>
