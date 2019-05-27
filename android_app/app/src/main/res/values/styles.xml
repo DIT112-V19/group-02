@@ -8,7 +8,7 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-    <style name="MySeekBar" parent="Widget.AppCompat.SeekBar">
+    <style name="MySeekBar" parent="android:style/Widget.SeekBar">
         <item name="android:minHeight">20dip</item>
         <item name="android:maxHeight">20dip</item>
         <item name="android:progressBackgroundTint">#9fa1a3</item>
