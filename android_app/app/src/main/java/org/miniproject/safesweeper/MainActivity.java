@@ -267,6 +267,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View v) {
                         writeToCar(GET_LOCATION);
+
                     }
                 });
 
