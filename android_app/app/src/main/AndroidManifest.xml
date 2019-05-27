@@ -22,7 +22,11 @@
         </activity>
         <activity
             android:name=".BluetoothActivity"
-            android:screenOrientation="portrait">
+            android:screenOrientation="landscape">
+        </activity>
+        <activity
+            android:name=".HomeActivity"
+            android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
