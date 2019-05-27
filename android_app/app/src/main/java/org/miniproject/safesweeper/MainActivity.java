@@ -23,6 +23,7 @@ import android.widget.ToggleButton;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
@@ -57,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String LAT_LNG_SEPARATOR = " ";
     public static final String END_OF_INPUT = "/";
 
-    public static final String DOUBLE_WITH_DECIMALS_REGEX = "\\d+\\.\\d+";
+    public static final String DOUBLE_WITH_DECIMALS_REGEX = "-?\\d+\\.\\d+";
 
     public static final String COORDINATE_REGEX = "-?\\d+\\.\\d+";
 
@@ -70,6 +71,12 @@ public class MainActivity extends AppCompatActivity {
     private int steerValue;
     private String command;
     private byte[] commandTest;
+
+    private ServerInfo serverInfo;
+    private ServerConnection conn;
+    private ArrayList<Mine> mines;
+    private boolean mineIsDetected = false;
+
 
     private String macAddress;
     BluetoothAdapter mBluetooth = null;
@@ -99,6 +106,10 @@ public class MainActivity extends AppCompatActivity {
         steeringToggle = (ToggleButton) findViewById(R.id.steeringToggle);
         getLocationBtn = (Button) findViewById(R.id.getLocationBtn);
         mineBtn = (Button) findViewById(R.id.mineBtn);
+
+        serverInfo = new ServerInfo();
+        conn = new ServerConnection(serverInfo);
+        mines = new ArrayList<Mine>();
 
         //Start task to connect with cars bluetooth asynchronously
         new ConnectBT().execute();
@@ -332,16 +343,23 @@ public class MainActivity extends AppCompatActivity {
 
             String locationStr  = input.substring(1, lastIndex);
 
-            locationStr = extractLocation(locationStr);
-            showLocation(locationStr);
-            return 3;
-
-            /* if we need the coordinates as double
             String latitudeStr = input.substring(1, indexOfSpace);
             String longitudeStr = input.substring(indexOfSpace + 1, lastIndex);
             double lat = convertToDouble(latitudeStr);
             double lng = convertToDouble(longitudeStr);
-            */
+
+            if(mineIsDetected) {
+                new addMinesToDb().execute(lat, lng);
+                mineIsDetected = false;
+            }
+
+
+            locationStr = extractLocation(locationStr);
+            showLocation(locationStr);
+            return 3;
+
+
+
         } else if(input.equals("x")){
             String locationInfo = "\n" + "\n" + "Fetching from satellite (Try Again)    ";
             showLocation(locationInfo);
@@ -351,6 +369,28 @@ public class MainActivity extends AppCompatActivity {
             showLocation(locationInfo);
         }
         return 0;
+    }
+
+
+    public class addMinesToDb extends AsyncTask<Double, Void, Mine> {
+
+        @Override
+        protected Mine doInBackground(Double... doubles) {
+            double lat = doubles[0];
+            double lng = doubles[1];
+            Mine mine = new Mine(lat,lng);
+            String location = conn.addMine(lat,lng);
+
+            return mine;
+        }
+
+        @Override
+        protected void onPostExecute(Mine mine) {
+            mines.add(mine);
+            Toast.makeText(getApplicationContext(),""+mine.getLat() + mine.getLng(),Toast.LENGTH_SHORT).show();
+            //add marker on map here.
+
+        }
     }
 
     public double convertToDouble(String str){
@@ -377,8 +417,12 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 locationText.setText("");   //in case a coordinate was displaying, to clear it
                 connectionTextView.setText("MINE DETECTED!");
+                mineIsDetected = true;
             }
-        });    }
+        });
+
+
+    }
 
     public void setConnectionTextView(String msg) {
         final String str = msg;
