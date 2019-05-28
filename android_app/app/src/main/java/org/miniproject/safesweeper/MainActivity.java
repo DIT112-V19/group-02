@@ -451,10 +451,6 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     public boolean onMenuItemClick(MenuItem item) {
         Toast.makeText(this, "Selected Item: " +item.getTitle(), Toast.LENGTH_SHORT).show();
         switch (item.getItemId()) {
-            /*case R.id.home_item:
-                Intent intentH = new Intent(this, HomeActivity.class);
-                startActivity(intentH);
-                return true;*/
             case R.id.map_item:
                 //Intent intent = new Intent(this, HomeActivity.class);
                 return true;

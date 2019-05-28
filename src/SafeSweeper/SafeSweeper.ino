@@ -71,6 +71,27 @@ BrushedMotor rightMotor(12, 13, 11);
 DifferentialControl control(leftMotor, rightMotor);
 SmartCar car(control, gyroscope, leftOdometer, rightOdometer);
 
+//Manual Control Case Switches
+const String ManualOption1 = "1";
+const String ManualOption2 = "2";
+const String ManualOption3 = "3";
+const String ManualOption4 = "4";
+const String ManualOption5 = "5";
+const String ManualOption7 = "7";
+const String ManualOption0 = "0";
+const String ManualOptionw = "w";
+const String ManualOptiony = "y";
+const String ManualOptionz = "z";
+const String ManualOptionx = "x";
+const String ManualOptionc = "c";
+
+//GPS Case Switches
+const String GPSoption1 = "GPGGA"; 
+const String GPSoption2 = "GPGSA";
+const String GPSoption3 = "GPGSV";
+const String GPSoption4 = "GPRMC";
+const String GPSoption5 = "GPVTG";
+
 void setup() {
   Serial.begin(BAUD_RATE);  //The general serial
   Serial3.begin(BAUD_RATE); //Serial for bluetooth
@@ -129,54 +150,56 @@ void detectingMine(){
 
 void manualMode(){
   char input = Serial3.read();
-    if (input == '1'){                          //Makes it go foward in slow speed
+  switch(input){
+    case ManualOption1:                     //Makes it go foward in slow speed
       car.setSpeed(sSpeed);
       car.setAngle(ANGLE_CORRECTION);
-    }
-    else if (input == '2'){                     //Makes it go foward in medium speed
+      break;
+    case ManualOption2:                     //Makes it go foward in medium speed
       car.setSpeed(mSpeed);
       car.setAngle(ANGLE_CORRECTION);
-    }
-    else if (input == '3'){                     //Makes it go foward in fast speed 
+      break;
+    case ManualOption3:                     //Makes it go foward in fast speed 
       car.setSpeed(fSpeed);
       car.setAngle(ANGLE_CORRECTION);
-    }
-    else if (input == '4'){                     //Makes it go foward in very fast speed
+      break;
+    case ManualOption4:                     //Makes it go foward in very fast speed
       car.setSpeed(vfSpeed);
       car.setAngle(ANGLE_CORRECTION);
-    }    
-    else if (input == '5'){                     //Makes it go backwards
+      break;
+    case ManualOption5:                     //Makes it go backwards
       car.setSpeed(bSpeed);
       car.setAngle(BACK_ANGLE_CORRECTION);
-    } 
-    else if (input == 'w'){                     //Makes it turn sharp left
+      break;
+    case ManualOptionw:                     //Makes it turn sharp left
       car.setSpeed(fSpeed);
       car.setAngle(slDegrees);
-    }
-    else if (input == 'y'){                     //Makes it turn left
+      break;
+    case ManualOptiony:                     //Makes it turn left
       car.setSpeed(fSpeed);
       car.setAngle(lDegrees);
-    }
-    else if (input == 'z'){                     //Makes it turn right
+      break;
+    case ManualOptionz:                     //Makes it turn right
       car.setSpeed(fSpeed);
       car.setAngle(rDegrees);
-    }
-    else if (input == 'x'){                     //Makes it turn sharp right
+      break;
+    case ManualOptionx:                     //Makes it turn sharp right
       car.setSpeed(fSpeed);
       car.setAngle(srDegrees);
-    }
-    else if (input == '0'){                     //Makes it stop
+      break;
+    case ManualOption0:                     //Makes it stop
       car.setSpeed(reduceSpeed);
       car.setSpeed(ZERO);
       car.setAngle(ZERO);
-    }
-    else if (input == '7'){                     //Switches to automode
+      break;
+    case ManualOption7:                     //Switches to automode
       automode = true;
-    }
-    else if (input == 'c'){                     //Send GPS
-    lookForGPS();                               //reads GPS 
-    sendGPS();
-    }
+      break;
+    case ManualOptionc:                     //Send GPS
+      lookForGPS();                               //reads GPS 
+      sendGPS();
+      break;
+  }
 }
 
 //Automatic mode methods:
@@ -295,47 +318,53 @@ void lookForGPS(){
     
     if(Mark_Start){
       data = reader();
-      if(data.equals("GPGGA")){
-        GGAUTCtime = reader();
-        GGAlatitude = reader();
-        GGAlatitude+=reader();
-        GGAlongitude = reader();
-        GGAlongitude+=reader();
-        GPStatus = reader();
-        SatelliteNum = reader();
-        HDOPfactor = reader();
-        Height = reader();
-        Mark_Start = false;
-        valid = true;
-        data = "";
-      } else if(data.equals("GPGSA")){
-        Mark_Start = false;
-        data = "";
-      } else if(data.equals("GPGSV")){
-        Mark_Start = false;
-        data = "";
-      } else if(data.equals("GPRMC")){
-        RMCUTCtime = reader();
-        PositionValid = reader();
-        RMClatitude = reader();
-        RMClatitude+=reader();
-        RMClongitude = reader();
-        RMClongitude+=reader();
-        Speed = reader();
-        Direction = reader();
-        Date = reader();
-        Declination = reader();
-        Declination+=reader();
-        Mode = reader();
-        valid = true;
-        Mark_Start = false;
-        data = "";
-      } else if(data.equals("GPVTG")){
-        Mark_Start = false;
-        data = "";
-      } else{
-        Mark_Start = false;
-        data = "";
+      switch(data){
+        case GPSoption1:
+          GGAUTCtime = reader();
+          GGAlatitude = reader();
+          GGAlatitude+=reader();
+          GGAlongitude = reader();
+          GGAlongitude+=reader();
+          GPStatus = reader();
+          SatelliteNum = reader();
+          HDOPfactor = reader();
+          Height = reader();
+          Mark_Start = false;
+          valid = true;
+          data = "";
+          break;
+        case GPSoption2:
+          Mark_Start = false;
+          data = "";
+          break;
+        case GPSoption3:
+          Mark_Start = false;
+          data = "";
+          break;
+        case GPSoption4:
+          RMCUTCtime = reader();
+          PositionValid = reader();
+          RMClatitude = reader();
+          RMClatitude+=reader();
+          RMClongitude = reader();
+          RMClongitude+=reader();
+          Speed = reader();
+          Direction = reader();
+          Date = reader();
+          Declination = reader();
+          Declination+=reader();
+          Mode = reader();
+          valid = true;
+          Mark_Start = false;
+          data = "";
+          break;
+        case GPSoption5:
+          Mark_Start = false;
+          data = "";
+          break;
+        case default:
+          Mark_Start = false;
+          data = "";
       }
     }
     

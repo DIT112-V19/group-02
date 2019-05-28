@@ -8,4 +8,20 @@
     <string name="lon2_00_000">lon2</string>
     <string name="cancel">Cancel</string>
     <string name="save">Save</string>
+    <string name="manual">MANUAL</string>
+    <string name="auto">AUTOMATIC</string>
+    <string name="showLoc">SHOW LOCATION</string>
+    <string name="awkMine">ACKNOWLEDGE MINE</string>
+    <string name="setBound">SET BOUNDARIES</string>
+    <string name="connection">text</string>
+    <string name="input">0</string>
+    <string name="connectBlue">Connect Bluetooth</string>
+    <string name="turnON">Turn On</string>
+    <string name="refresh">Refresh</string>
+    <string name="selectDevice">Select Device</string>
+    <string name="logo">Logo</string>
+    <string name="title">SafeSweeper</string>
+    <string name="connect">Connect</string>
+    <string name="boundaryBack">Boundary Background</string>
+
 </resources>

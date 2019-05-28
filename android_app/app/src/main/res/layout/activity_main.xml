@@ -51,8 +51,8 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="10dp"
         android:background="@drawable/btnsmall"
-        android:textOff="Manual"
-        android:textOn="Automatic" />
+        android:textOff="@string/manual"
+        android:textOn="@string/auto" />
 
     <Button
         android:id="@+id/menuBtn"
@@ -72,7 +72,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="21dp"
         android:background="@drawable/btnsmall"
-        android:text="Show Location"
+        android:text="@string/showLoc"
         android:visibility="visible" />
 
     <Button
@@ -80,29 +80,29 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignTop="@id/steeringToggle"
-        android:layout_marginLeft="10dp"
+        android:layout_marginStart="10dp"
         android:layout_toEndOf="@id/steeringToggle"
         android:background="@drawable/btnmed"
-        android:text="ACKNOWLEDGE MINE" />
+        android:text="@string/awkMine" />
 
     <Button
         android:id="@+id/boundaryBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@id/mineBtn"
+        android:layout_alignStart="@id/mineBtn"
         android:layout_alignTop="@id/getLocationBtn"
         android:background="@drawable/btnmed"
         android:onClick="boundary"
-        android:text="SET BOUNDARIES" />
+        android:text="@string/setBound" />
 
     <TextView
         android:id="@+id/throttleText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/menuBtn"
-        android:layout_alignRight="@id/menuBtn"
+        android:layout_alignEnd="@id/menuBtn"
         android:layout_marginTop="40dp"
-        android:text="0"
+        android:text="@string/input"
         android:textColor="@android:color/holo_green_light"
         android:textSize="30sp" />
 
@@ -112,7 +112,7 @@
         android:layout_height="75dp"
         android:layout_alignParentBottom="true"
         android:layout_toEndOf="@id/steeringBar"
-        android:text="0"
+        android:text="@string/input"
         android:textColor="@android:color/holo_green_light"
         android:textSize="30sp" />
 
@@ -126,7 +126,7 @@
         android:layout_marginTop="21dp"
         android:layout_marginBottom="81dp"
         android:fontFamily="monospace"
-        android:text="text"
+        android:text="@string/connection"
         android:textAlignment="center"
         android:textColor="#FFC107"
         android:textSize="22sp" />
@@ -136,7 +136,7 @@
         android:layout_width="wrap_content"
         android:layout_height="131dp"
         android:layout_alignParentTop="true"
-        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
         android:textColor="#0589C9"
         android:textSize="20sp" />
 

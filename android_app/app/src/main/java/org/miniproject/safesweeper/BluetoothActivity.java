@@ -53,19 +53,17 @@ public class BluetoothActivity extends AppCompatActivity implements PopupMenu.On
 
     }
 
-    public void on(View v) {
+    public void switchOnOff(View v) {
         if (!BA.isEnabled()) {
             Intent turnOn = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(turnOn, 0);
             Toast.makeText(getApplicationContext(), "Turned on", Toast.LENGTH_LONG).show();
+            btnOn.setText("TURN ON");
         } else {
-            Toast.makeText(getApplicationContext(), "Already on", Toast.LENGTH_LONG).show();
+            BA.disable();
+            Toast.makeText(getApplicationContext(), "Turned off", Toast.LENGTH_LONG).show();
+            btnOn.setText("TURN OFF");
         }
-    }
-
-    public void off(View v) {
-        BA.disable();
-        Toast.makeText(getApplicationContext(), "Turned off", Toast.LENGTH_LONG).show();
     }
 
     public void refresh(View v) {
@@ -98,11 +96,6 @@ public class BluetoothActivity extends AppCompatActivity implements PopupMenu.On
     public boolean onMenuItemClick(MenuItem item) {
         Toast.makeText(this, "Selected Item: " +item.getTitle(), Toast.LENGTH_SHORT).show();
         switch (item.getItemId()) {
-            /*
-            case R.id.home_item:
-                Intent intentH = new Intent(this, HomeActivity.class);
-                startActivity(intentH);
-                return true;*/
             case R.id.map_item:
                 //Intent intent = new Intent(this, HomeActivity.class);
                 return true;
