@@ -29,7 +29,6 @@ import java.util.UUID;
 public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener{
 
     Button mineBtn, menuBtn, boundaryBtn, getLocationBtn;
-    TextView textView1;
     SeekBar throttleBar, steeringBar;
     TextView throttleText, steeringText, locationText, connectionTextView;
     ToggleButton steeringToggle;
@@ -41,9 +40,9 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     public static final int STEERING_DEFAULT = 50;
 
     //Car commands
-    public static final String STAND_STILL = "0";
-    public static final String AUTOMATIC_MODE = "7";
-    public static final String MANUAL_MODE = "6";
+    public static final String STAND_STILL = "k";
+    public static final String AUTOMATIC_MODE = "l";
+    public static final String MANUAL_MODE = "n";
     public static final String GET_LOCATION = "c";
     public static final String ACKNOWLEDGE_MINE = "m";
 
@@ -55,12 +54,12 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
     public static final String DOUBLE_WITH_DECIMALS_REGEX = "-?\\d+\\.\\d+";
 
-    public static final String COORDINATE_REGEX = "-?\\d+\\.\\d+";
+    public static final String COORDINATE_REGEX = "-?\\d+\\.?\\d+";
 
-    String lat1Text = "";
-    String lat2Text = "";
-    String lon1Text = "";
-    String lon2Text = "";
+    private String lat1Text = "";
+    private String lat2Text = "";
+    private String lon1Text = "";
+    private String lon2Text = "";
 
     private int speedValue;
     private int steerValue;
@@ -89,7 +88,6 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
         macAddress = getIntent().getStringExtra("MAC");
 
-        textView1 = (TextView) findViewById(R.id.textview);
         throttleBar = (SeekBar) findViewById(R.id.throttleBar);
         steeringBar = (SeekBar) findViewById(R.id.steeringBar);
         throttleText = (TextView) findViewById(R.id.throttleText);
@@ -214,10 +212,8 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                     @Override
                     public void onClick(View v) {
                         if (steeringToggle.isChecked()) {
-                            textView1.setText("Automatic");
                             command = AUTOMATIC_MODE;
                         } else {
-                            textView1.setText("Manual");
                             command = MANUAL_MODE;
                         }
                         writeToCar(command);
@@ -335,12 +331,9 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                 mineIsDetected = false;
             }
 
-
             locationStr = extractLocation(locationStr);
             showLocation(locationStr);
             return 3;
-
-
 
         } else if(input.equals("x")){
             String locationInfo = "\n" + "\n" + "Fetching from satellite (Try Again)    ";
@@ -368,7 +361,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         @Override
         protected void onPostExecute(Mine mine) {
             mines.add(mine);
-            Toast.makeText(getApplicationContext(),""+mine.getLat() + mine.getLng(),Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getApplicationContext(),""+mine.getLat() + mine.getLng(),Toast.LENGTH_SHORT).show();
             //add marker on map here.
 
         }
@@ -510,11 +503,13 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         }
     }
 
+    //a dialog pop up for digital boundary input
     public void boundary(View v) {
         final AlertDialog.Builder mBuilder = new AlertDialog.Builder(this);
         View mView = getLayoutInflater().inflate(R.layout.boundary_input, null);
         mBuilder.setCancelable(true);
 
+        //using mView
         final TextInputEditText lat1Input = (TextInputEditText) mView.findViewById(R.id.lat1InputTxt);
         final TextInputEditText lat2Input = (TextInputEditText) mView.findViewById(R.id.lat2InputTxt);
         final TextInputEditText lon1Input = (TextInputEditText) mView.findViewById(R.id.lon1InputTxt);
@@ -530,12 +525,13 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         applyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                boolean notComplete = false;
+                boolean notComplete = false;       //for error in input
                 String lat1 = lat1Input.getText().toString().trim();
                 String lat2 = lat2Input.getText().toString().trim();
                 String lon1 = lon1Input.getText().toString().trim();
                 String lon2 = lon2Input.getText().toString().trim();
 
+                //to use the last 7 digits after decimal of an input
                 lat1 = limitDigit(lat1);
                 lat2 = limitDigit(lat2);
                 lon1 = limitDigit(lon1);
@@ -545,9 +541,9 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                     lat1Input.setError("Field is empty");
                     notComplete = true;
                 } else if (!lat1.matches(COORDINATE_REGEX)) {
-                    lat1Input.setError("use format of 00.0000000");
+                    lat1Input.setError("Use format of ##.#######");
                     notComplete = true;
-                } else if (latitudeDigit(lat1)) {
+                } else if (latitudeDigit(lat1)) {   //for number of digits before decimal
                     lat1Input.setError("latitude should be two digits max before decimal");
                     notComplete = true;
                 }
@@ -556,10 +552,13 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                     lat2Input.setError("Field is empty");
                     notComplete = true;
                 } else if (!lat2.matches(COORDINATE_REGEX)) {
-                    lat2Input.setError("use format of 00.0000000");
+                    lat2Input.setError("Use format of ##.#######");
                     notComplete = true;
-                } else if (latitudeDigit(lat2)) {
+                } else if (latitudeDigit(lat2)) {   //for number of digits before decimal
                     lat2Input.setError("latitude should be two digits max before decimal");
+                    notComplete = true;
+                } else if (lat2.equals(lat1)){
+                    lat2Input.setError("two latitudes shall not be the same");
                     notComplete = true;
                 }
 
@@ -567,10 +566,10 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                     lon1Input.setError("Field is empty");
                     notComplete = true;
                 } else if (!lon1.matches(COORDINATE_REGEX)) {
-                    lon1Input.setError("use format of 000.0000000");
+                    lon1Input.setError("Use format of ###.#######");
                     notComplete = true;
-                } else if (longitudeDigit(lon1)) {
-                    lon1Input.setError("latitude should be three digits max before decimal");
+                } else if (longitudeDigit(lon1)) {   //for number of digits before decimal
+                    lon1Input.setError("longitude should be three digits max before decimal");
                     notComplete = true;
                 }
 
@@ -578,20 +577,25 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                     lon2Input.setError("Field is empty");
                     notComplete = true;
                 } else if (!lon2.matches(COORDINATE_REGEX)) {
-                    lon2Input.setError("use format of 000.0000000");
+                    lon2Input.setError("Use format of ###.#######");
                     notComplete = true;
-                } else if (longitudeDigit(lon2)) {
-                    lon2Input.setError("latitude should be three digits max before decimal");
+                } else if (longitudeDigit(lon2)) {   //for number of digits before decimal
+                    lon2Input.setError("longitude should be three digits max before decimal");
+                    notComplete = true;
+                } else if (lon2.equals(lon1)){
+                    lon2Input.setError("two longitudes shall not be the same");
                     notComplete = true;
                 }
 
-                if (!notComplete) {
+                if (!notComplete) { //same as if complete
                     lat1Text = lat1;
                     lat2Text = lat2;
                     lon1Text = lon1;
                     lon2Text = lon2;
 
-                    dialog.dismiss();
+                    String command = lat1Text + " " + lat2Text + " " + lon1Text + " " + lon2Text;
+                    transferToCar(command);
+                    dialog.dismiss();   //the need of the dialog is finished
                 }
             }
         });
@@ -601,5 +605,28 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                 dialog.cancel();
             }
         });
+    }
+
+    //write the digital boundary to the car
+    public void transferToCar (String msg){
+        msg = " #" + msg + "*"; //coded so that it starts with # and finishes with *
+        int amount = msg.length();
+        try {
+            for(int i = 0; i < amount ; i++){
+                outputStream.write(msg.charAt(i));
+            }
+
+        } catch (IOException exc) {
+            Log.e("IOException: ", exc.getMessage());
+        }
+    }
+
+    //just for the sake of waiting some seconds while showing a text before crashing or so
+    public void showInfo(String info){
+        Toast.makeText(this, info, Toast.LENGTH_LONG).show();
+        int j = 0;
+        for(int i = 0; i < 2000000; i++){
+            j++;
+        }
     }
 }
