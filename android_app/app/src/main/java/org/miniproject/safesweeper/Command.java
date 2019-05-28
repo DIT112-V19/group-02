@@ -3,16 +3,16 @@ package org.miniproject.safesweeper;
 public class Command {
 
     //Car commands//
-    public static final String MOVE_FSPEED1 = "1";
-    public static final String MOVE_FSPEED2 = "2";
-    public static final String MOVE_FSPEED3 = "3";
-    public static final String MOVE_FSPEED4 = "4";
-    public static final String STAND_STILL = "0";
-    public static final String MOVE_BACKWARD = "5";
-    public static final String STEER_RIGHT = "z"; //consider changing these as well?
-    public static final String STEER_LEFT = "y"; // ""
-    public static final String SHARP_RIGHT = "x"; //left and right as letters for clarity and ease
-    public static final String SHARP_LEFT = "w"; //while programming
+    public static final String MOVE_FSPEED1 = "a";
+    public static final String MOVE_FSPEED2 = "b";
+    public static final String MOVE_FSPEED3 = "d";
+    public static final String MOVE_FSPEED4 = "e";
+    public static final String STAND_STILL = "k";
+    public static final String MOVE_BACKWARD = "f";
+    public static final String STEER_RIGHT = "i"; //consider changing these as well?
+    public static final String STEER_LEFT = "h"; // ""
+    public static final String SHARP_RIGHT = "j"; //left and right as letters for clarity and ease
+    public static final String SHARP_LEFT = "g"; //while programming
 
     //Magic numbers
     public static final int SPEED_0 = 0;
