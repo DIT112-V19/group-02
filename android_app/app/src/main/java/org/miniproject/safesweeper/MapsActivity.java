@@ -1,8 +1,15 @@
 package org.miniproject.safesweeper;
 
+import android.bluetooth.BluetoothAdapter;
+import android.content.Intent;
 import android.os.AsyncTask;
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.PopupMenu;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -13,12 +20,19 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, PopupMenu.OnMenuItemClickListener{
 
     private GoogleMap mMap;
     private ServerConnection mines;
     private ServerInfo serverInfo;
     private ServerConnection conn;
+    private String address;
+    private boolean connected = true;
+    private BluetoothAdapter BA;
+
+
+    Button menuBtn;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,9 +42,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+        address = getIntent().getStringExtra("MAC");
+        menuBtn = (Button) findViewById(R.id.menuBtn);
+        BA = BluetoothAdapter.getDefaultAdapter();
 
         serverInfo = new ServerInfo();
         conn = new ServerConnection(serverInfo);
+
+
+        menuBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PopupMenu popup = new PopupMenu(MapsActivity.this, v);
+                popup.setOnMenuItemClickListener(MapsActivity.this);
+                popup.inflate(R.menu.popup_menu);
+                popup.show();
+            }
+        });
     }
 
 
@@ -71,6 +99,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             }
 
+        }
+    }
+
+    public boolean onMenuItemClick(MenuItem item) {
+        Toast.makeText(this, "Selected Item: " +item.getTitle(), Toast.LENGTH_SHORT).show();
+        switch (item.getItemId()) {
+            case R.id.map_item:
+                Toast.makeText(this,"You are already on this page!", Toast.LENGTH_SHORT).show();
+                return true;
+            case R.id.control_item:
+                Intent intentC = new Intent(this, MainActivity.class);
+                intentC.putExtra("MAC", address);
+                //intentC.putExtra("MAP", "YES");
+                startActivity(intentC);
+                return true;
+            case R.id.bluetooth_item:
+                Intent intentB = new Intent(this, BluetoothActivity.class);
+                startActivity(intentB);
+                return true;
+            default:
+                return false;
         }
     }
 }

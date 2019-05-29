@@ -2,10 +2,12 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
     <item
         android:id="@+id/control_item"
-        android:title="Control Hub" />
-    <item android:id="@+id/map_item"
-        android:title="Map" />
+        android:title="@string/ControlHub" />
+
+    <item
+        android:id="@+id/map_item"
+        android:title="@string/Map" />
     <item
         android:id="@+id/bluetooth_item"
-        android:title="Bluetooth Connection" />
+        android:title="@string/BluetoothHub" />
 </menu>
