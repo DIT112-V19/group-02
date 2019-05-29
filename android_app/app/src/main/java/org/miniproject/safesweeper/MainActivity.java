@@ -249,6 +249,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                     @Override
                     public void onClick(View v) {
                         writeToCar(GET_LOCATION);
+
                     }
                 });
 
