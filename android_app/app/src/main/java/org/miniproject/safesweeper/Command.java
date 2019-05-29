@@ -16,10 +16,10 @@ public class Command {
 
     //Magic numbers
     public static final int SPEED_0 = 0;
-    public static final int SPEED_1 = 25;
-    public static final int SPEED_2 = 50;
-    public static final int SPEED_3 = 75;
-    public static final int SPEED_4 = 100;
+    public static final int SPEED_1 = 17;
+    public static final int SPEED_2 = 35;
+    public static final int SPEED_3 = 52;
+    public static final int SPEED_4 = 70;
 
 
     public static byte[] speed (int speedValue) {
