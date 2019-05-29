@@ -1,6 +1,7 @@
 #include <Smartcar.h>
 #include <SPI.h>
 #include <RFID.h> 
+#include <stdlib.h>
 
 //GPS     
 String data = "";
@@ -15,7 +16,18 @@ const String NOT_FOUND = "Not yet identified.";
 const String NOT_WORKING = "gps module connection problem.";
 const String TEST_VALUE = "c-83.582704 -142.186889/";
 String gpsLocation = NOT_FOUND;
-
+#define max_char 200       // number of characters to be saved
+char message[max_char];    // stores the characters message from app
+char r_char;               // reads each character from app sent as digital boundary
+byte index = 0;            // for array
+String backLat = ""; //boundary 1
+String frontLat = ""; //boundary 2
+String leftLon = ""; //boundary 3
+String rightLon = ""; //boundary 4
+String currentLat = ""; //current position of car
+String currentLon = ""; //current position of car
+int minDistance = 100; //safe distance to allow the car drive without boundary unless specified
+boolean startStoring = false; //to signal data can be stored
 
 //Odometer:
 const unsigned short LEFT_ODOMETER_PIN = 2;
@@ -25,7 +37,7 @@ DirectionlessOdometer leftOdometer(PULSES_PER_METER);
 DirectionlessOdometer rightOdometer(PULSES_PER_METER);
 
 //Ultrasonic sensor:
-bool obstacle = false;
+boolean obstacle = false;
 const unsigned int MAX_DISTANCE = 60;  //recognizable by sensor
 const unsigned int MIN_DISTANCE = 20; //distance to obstacle
 const int TRIGGER_PIN = 6; //D6
@@ -60,12 +72,28 @@ const int slDegrees = -75; //degrees to turn left
 const int lDegrees = -50;
 const int srDegrees = 75; //degrees to turn right
 const int rDegrees = 50;
+const char MOVE_FSPEED1 = 'a';
+const char MOVE_FSPEED2 = 'b';
+const char GET_LOCATION = 'c';
+const char MOVE_FSPEED3 = 'd';
+const char MOVE_FSPEED4 = 'e';
+const char MOVE_BACKWARD = 'f';
+const char SHARP_LEFT = 'g';
+const char STEER_LEFT = 'h';
+const char STEER_RIGHT = 'i';
+const char SHARP_RIGHT = 'j';
+const char STAND_STILL = 'k';
+const char AUTOMATIC_MODE = 'l';
+const char MANUAL_MODE = 'n';
+const char REPORT_MINE = 'm';
+const char OUT_OF_BOUNDARY = 'o';
+
 
 //Smartcar:
 const int BAUD_RATE = 9600; //for serial
 const int ANGLE_CORRECTION = 13;  //offset
 const int BACK_ANGLE_CORRECTION = 26; //backwards offset
-bool automode = false;
+boolean automode = false;
 BrushedMotor leftMotor(8, 10, 9);
 BrushedMotor rightMotor(12, 13, 11);
 DifferentialControl control(leftMotor, rightMotor);
@@ -96,6 +124,7 @@ void setup() {
 }
 
 void loop() {
+  inputHandler();
   if(rfid.isCard()){                            //Detects mine        
     detectingMine();
   }
@@ -108,16 +137,54 @@ void loop() {
   //Serial.println(gpsLocation);          //for testing
 }
 
+void inputHandler(){
+    index = 0;
+    
+    //Reading location 
+    while(Serial3.available() > 0){
+      r_char = Serial3.read();      // Reads a character
+      
+      if(r_char == '#'){        //signal as a boundary info begins
+        startStoring = true;
+        if(automode)
+          car.setSpeed(ZERO);
+      }
+        
+      if(startStoring){
+        if(automode)
+          car.setSpeed(ZERO);
+        message[index++] = r_char;
+        delay(10);        //to slow a bit so that data could not be missed
+      }
+      
+      if (r_char == '*')      //signal as a boundary info ends
+      {
+        String toBeSent = "";
+        startStoring = false;
+        if (index > 4) {  //minimum of 4 numbers for each latitude and longitude
+          for (int i = 0; i < index; i++){    //preparing a string of characters
+            toBeSent = toBeSent + message [i];
+          }
+          setBoundary(toBeSent);
+          if(automode)  //check gps
+            lookForGPS();
+          toBeSent = "";
+          index = 0;
+        }
+      }
+    }
+}
+
 void detectingMine(){
   //if(isNewLocation()){  //uncomment if not testing
     car.setSpeed(reduceSpeed);
     car.setSpeed(ZERO);
-    Serial3.write('m');
+    Serial3.write(REPORT_MINE);
     
     while(!Serial3.available()){}
     char command = Serial3.read();
     handleLocation();                           //sends GPS 
-    while(command != 'm'){
+    while(command != REPORT_MINE){
       command = Serial3.read();
     }
     car.setSpeed(fSpeed);
@@ -129,61 +196,65 @@ void detectingMine(){
 
 void manualMode(){
   char input = Serial3.read();
-    if (input == '1'){                          //Makes it go foward in slow speed
+  switch (input){
+    case MOVE_FSPEED1:                          //Makes it go foward in slow speed
       car.setSpeed(sSpeed);
       car.setAngle(ANGLE_CORRECTION);
-    }
-    else if (input == '2'){                     //Makes it go foward in medium speed
-      car.setSpeed(mSpeed);
+      break;
+    case MOVE_FSPEED2:                          //Makes it go foward in medium speed
+      car.setSpeed(sSpeed);
       car.setAngle(ANGLE_CORRECTION);
-    }
-    else if (input == '3'){                     //Makes it go foward in fast speed 
+      break;
+    case MOVE_FSPEED3:                          //Makes it go foward in fast speed 
       car.setSpeed(fSpeed);
       car.setAngle(ANGLE_CORRECTION);
-    }
-    else if (input == '4'){                     //Makes it go foward in very fast speed
+      break;
+    case MOVE_FSPEED4:                          //Makes it go foward in very fast speed
       car.setSpeed(vfSpeed);
       car.setAngle(ANGLE_CORRECTION);
-    }    
-    else if (input == '5'){                     //Makes it go backwards
+      break;
+    case MOVE_BACKWARD:                          //Makes it go backwards
       car.setSpeed(bSpeed);
       car.setAngle(BACK_ANGLE_CORRECTION);
-    } 
-    else if (input == 'w'){                     //Makes it turn sharp left
+      break;
+    case SHARP_LEFT:                         //Makes it turn sharp left
       car.setSpeed(fSpeed);
       car.setAngle(slDegrees);
-    }
-    else if (input == 'y'){                     //Makes it turn left
+      break;
+    case STEER_LEFT:                         //Makes it turn left
       car.setSpeed(fSpeed);
       car.setAngle(lDegrees);
-    }
-    else if (input == 'z'){                     //Makes it turn right
+      break;
+    case STEER_RIGHT:                         //Makes it turn right
       car.setSpeed(fSpeed);
       car.setAngle(rDegrees);
-    }
-    else if (input == 'x'){                     //Makes it turn sharp right
+      break;
+    case SHARP_RIGHT:                        //Makes it turn sharp right
       car.setSpeed(fSpeed);
       car.setAngle(srDegrees);
-    }
-    else if (input == '0'){                     //Makes it stop
+      break;
+    case STAND_STILL:                       //Makes it stop
       car.setSpeed(reduceSpeed);
       car.setSpeed(ZERO);
       car.setAngle(ZERO);
-    }
-    else if (input == '7'){                     //Switches to automode
+      break;
+    case AUTOMATIC_MODE:                       //letter l Switches to auto mode
       automode = true;
-    }
-    else if (input == 'c'){                     //Send GPS
-    lookForGPS();                               //reads GPS 
-    sendGPS();
-    }
+      break;
+    case GET_LOCATION:                       //Send GPS
+      lookForGPS();                 //reads GPS 
+      sendGPS();
+      break;
+  }
 }
 
 //Automatic mode methods:
 
 void autoMode(){
+  if(backLat != "") //if boundary is defined
+    lookForGPS();
   char input = Serial3.read();
-    if(input == '6'){
+    if(input == MANUAL_MODE){
       automode = false;
       car.setSpeed(reduceSpeed);
       car.setSpeed(ZERO);
@@ -204,7 +275,7 @@ void rotateTillFree() {
   
   while(obstacleExists()){
     unsigned int initialHeading = car.getHeading();
-    bool hasReachedTargetDegrees = false;
+    boolean hasReachedTargetDegrees = false;
     
     while (!hasReachedTargetDegrees) {
       
@@ -228,16 +299,23 @@ void rotateTillFree() {
     }
   }
 }
+
 /**
    Measure and return the distance of obstacle within 100 cm
 */
 int getObstacleDistance(){
-  return frontSensor.getDistance();
+  // Stop after it moves a length of safe distance
+  if (car.getDistance() >= minDistance) {
+    car.setSpeed(0);
+    car.update();
+  } else
+    return frontSensor.getDistance();
 }
+
 /**
    Checks if there is an obstacle within 100cm
 */
-bool obstacleExists(){
+boolean obstacleExists(){
   int distanceToObstacle = getObstacleDistance();
   
   if(distanceToObstacle < MIN_DISTANCE && distanceToObstacle > MIN_B){
@@ -288,7 +366,7 @@ void rotateOnSpot(int targetDegrees, int speed) {
   }
 }
 
-//
+//search for gps
 void lookForGPS(){
   if (Serial1.available()> 0){
     gpsLocation = NOT_FOUND;
@@ -353,6 +431,12 @@ void lookForGPS(){
         Serial.println(convertedLon);
         Serial.println(" ");
         gpsLocation = "c" + convertedLat + " " + convertedLon + "/";
+        currentLat = convertedLat;
+        currentLon = convertedLon;
+        int minDis = setMinDistance(); //to record the safe distance
+        if (minDis < 0){
+          outOfBoundary();
+        }
         valid = false;
       } 
     }
@@ -399,9 +483,6 @@ String convertData(String rawString){
   String left1 = leftPart.substring(0, leftDigit - 2);
   String left2 = leftPart.substring(leftDigit-2);
   String newString = left1 + "." + left2 + rightPart;
-  /*while(newString.charAt(0) == '0'){
-      newString = newString.substring(1);
-  }*/
   
   if(lastChar == 'W' || lastChar == 'S'){
       newString = "-" + newString;
@@ -415,10 +496,10 @@ void sendGPS(){
   String gpsToBeSent = gpsLocation;
   int lengthOfChar = gpsToBeSent.length();
   if(gpsToBeSent.equals(NOT_FOUND)){
-    gpsToBeSent = TEST_VALUE;  //for testing purpose
+    gpsToBeSent = TEST_VALUE;  //comment if not testing
     //gpsToBeSent = "x";    //uncomment if not testing
   } else if (gpsToBeSent.equals(NOT_WORKING)){
-    gpsToBeSent = "y";    //uncomment if not testing
+    gpsToBeSent = "y";
   }
   
   lengthOfChar = gpsToBeSent.length();
@@ -428,13 +509,15 @@ void sendGPS(){
   }
 }
 
-void handleLocation(){  //only when mine detected
+//looking for location when mine is detected
+void handleLocation(){
   Serial3.end();
   lookForGPS();                             
   Serial3.begin(BAUD_RATE);
   sendGPS();
 }
 
+//check if the mine location is new
 boolean isNewLocation(){
   if(gpsLocation != NOT_FOUND && gpsLocation != NOT_WORKING /*&& gpsLocation != TEST_VALUE && !isInArray()*/){  //uncomment if out in field
     if(savedLocations < arraySize && gpsLocation != TEST_VALUE)  //test value active only for test purpose
@@ -444,10 +527,117 @@ boolean isNewLocation(){
     return false;
 }
 
+//convert the string of boundaries to separate latitudes and longitudes
+void setBoundary(String text){
+  //preparing for extraction
+  text = text.substring(text.indexOf('#') + 1);
+  text = text.substring(0, text.indexOf('*'));
+  text = text + " ";
+  
+  Serial.println("new coordinate: " + text);
+  
+  //first part
+  backLat = text.substring(0,text.indexOf(" "));
+  text = text.substring(text.indexOf(" ") + 1);
+  //Serial.println("new txt: " + text);
+
+  //second part
+  frontLat = text.substring(0,text.indexOf(" "));
+  text = text.substring(text.indexOf(" ") + 1);
+  //Serial.println("new txt: " + text);
+
+  //third part
+  leftLon = text.substring(0,text.indexOf(" "));
+  text = text.substring(text.indexOf(" ") + 1);
+  //Serial.println("new txt: " + text);
+
+  //last part
+  rightLon = text.substring(0,text.indexOf(" "));
+  Serial.println("The locations are: ");  //for debuging
+  Serial.println(backLat);
+  Serial.println(frontLat);
+  Serial.println(leftLon);
+  Serial.println(leftLon);
+}
+
+//to check if a coordinate is already existing
 boolean isInArray(){
   for (int i = 0; i < savedLocations; i++){
     if(coordinates[i].equals(gpsLocation))
       return true; 
   }
   return false;
+}
+
+//min distance to the digital boundaries
+int setMinDistance (){
+  int lat1Distance = getLat1Distance();
+  int lat2Distance = getLat2Distance();
+  int lon1Distance = getLon1Distance();
+  int lon2Distance = getLon2Distance();
+  
+  minDistance = min(min(min(lat1Distance, lat2Distance), lon1Distance), lon2Distance);
+  return minDistance;
+}
+
+//distance between car and latitude1
+int getLat1Distance(){
+  double latFactorLindholmen = 100000 * 1.125; //distance multiplier around lindholmen
+  if(backLat != "" && currentLat != ""){
+    double num1 = strtod(currentLat.c_str(), NULL);
+    double num2 = strtod(backLat.c_str(), NULL);
+    return (int)((num1 - num2) * latFactorLindholmen); //to convert to meters
+  }
+  else
+    return 100;
+}
+
+//distance between car and latitude2
+int getLat2Distance(){
+  double latFactorLindholmen = 100000 * 1.125; //distance multiplier around lindholmen
+  if(frontLat != "" && currentLat != ""){
+    double num1 = strtod(currentLat.c_str(), NULL);
+    double num2 = strtod(frontLat.c_str(), NULL);
+    return (int) ((num2 - num1) * latFactorLindholmen); //to convert to meters
+  }
+  else
+    return 100;
+}
+
+//distance between car and longitude1
+int getLon1Distance(){
+  double lonFactorLindholmen = 100000*0.6316; //distance multiplier around lindholmen
+  if(leftLon != "" && currentLon != ""){
+    double num1 = strtod(currentLon.c_str(), NULL);
+    double num2 = strtod(leftLon.c_str(), NULL);
+    return (int)((num1 - num2) * lonFactorLindholmen); //to convert to meters
+  }
+  else
+    return 100;
+}
+
+//distance between car and longitude2
+int getLon2Distance(){
+  double lonFactorLindholmen = 100000*0.6316; //distance multiplier around lindholmen
+  if(rightLon != "" && currentLon != ""){
+    double num1 = strtod(currentLon.c_str(), NULL);
+    double num2 = strtod(rightLon.c_str(), NULL);
+    return (int) abs((num2 - num1) * lonFactorLindholmen);  //meters
+  }
+  else
+    return 100;
+}
+
+//if sweeper is out of boundary
+void outOfBoundary(){
+    car.setSpeed(reduceSpeed);
+    car.setSpeed(ZERO);
+    Serial3.write(OUT_OF_BOUNDARY); //send info to app
+    
+    while(!Serial3.available()){}
+    char command = Serial3.read();
+    
+    while(command != MANUAL_MODE){  //wait until manual mode is enabled
+      command = Serial3.read();
+    }
 }
