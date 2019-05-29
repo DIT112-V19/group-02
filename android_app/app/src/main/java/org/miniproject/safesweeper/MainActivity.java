@@ -45,6 +45,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     public static final String MANUAL_MODE = "n";
     public static final String GET_LOCATION = "c";
     public static final String ACKNOWLEDGE_MINE = "m";
+    public static final String OUT_OF_BOUNDARY_REGEX = "o";
 
     //inputs from car
     public static final String LOCATION_REGEX = "c-?\\d+\\.\\d+\\s-?\\d+\\.\\d+/";
@@ -54,7 +55,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
 
     public static final String DOUBLE_WITH_DECIMALS_REGEX = "-?\\d+\\.\\d+";
 
-    public static final String COORDINATE_REGEX = "-?\\d+\\.?\\d+";
+    public static final String COORDINATE_REGEX = "-?\\d+(\\.\\d+)?";
 
     private String lat1Text = "";
     private String lat2Text = "";
@@ -216,6 +217,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                         } else {
                             command = MANUAL_MODE;
                         }
+                        locationText.setText("");
                         writeToCar(command);
                     }
                 });
@@ -342,6 +344,9 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         } else if (input.equals("y")) {
             String locationInfo = "\n" + "\n" + "Inactive GPS-Module             ";
             showLocation(locationInfo);
+        } else if (input.matches(OUT_OF_BOUNDARY_REGEX)){
+            String msg =  "\n" + "OUT OF BOUNDARY!             " + "\n" +" (Drive Manually)             ";
+            showLocation(msg);
         }
         return 0;
     }
@@ -410,10 +415,10 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     public String extractLocation(String locationStr) {
         String firstText = locationStr.substring(0, locationStr.indexOf(LAT_LNG_SEPARATOR));
         String secondText = locationStr.substring(locationStr.indexOf(LAT_LNG_SEPARATOR) + 1);
-        String result = "\n" + "\n" + "             Mine Location   " + "\n";   //not to conflict when shown together with 'detected' text
+        String result = "\n" + "\n" + "                  Location   " + "\n";   //not to conflict when shown together with 'detected' text
 
-        firstText = convertLocation(firstText);
-        secondText = convertLocation(secondText);
+        /*firstText = convertLocation(firstText);
+        secondText = convertLocation(secondText);*/
 
         return result + firstText + ", " + secondText + "      ";
     }
@@ -627,6 +632,8 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         int j = 0;
         for(int i = 0; i < 2000000; i++){
             j++;
+
+
         }
     }
 }
