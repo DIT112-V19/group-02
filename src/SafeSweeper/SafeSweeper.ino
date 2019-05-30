@@ -18,7 +18,7 @@ const String TEST_VALUE = "c-83.582704 -142.186889/";
 String gpsLocation = NOT_FOUND;
 #define max_char 200       // number of characters to be saved
 char message[max_char];    // stores the characters message from app
-char r_char;               // reads each character from app sent as digital boundary
+char previousChar;               // the previous input
 byte index = 0;            // for array
 String backLat = ""; //boundary 1
 String frontLat = ""; //boundary 2
@@ -88,6 +88,7 @@ const char MANUAL_MODE = 'n';
 const char REPORT_MINE = 'm';
 const char OUT_OF_BOUNDARY = 'o';
 
+char input;
 
 //Smartcar:
 const int BAUD_RATE = 9600; //for serial
@@ -134,30 +135,30 @@ void loop() {
   else if (automode == false){                  //Manual mode
     manualMode();
   }
-  //Serial.println(gpsLocation);          //for testing
+  //Serial.println(gpsLocation);                //for testing
 }
 
 void inputHandler(){
     index = 0;
-    
+    previousChar = input;
     //Reading location 
     while(Serial3.available() > 0){
-      r_char = Serial3.read();      // Reads a character
+      input = Serial3.read();      // Reads a character
       
-      if(r_char == '#'){        //signal as a boundary info begins
+      if(input == '#'){        //signal as a boundary info begins
         startStoring = true;
         if(automode)
           car.setSpeed(ZERO);
       }
-        
+      
       if(startStoring){
         if(automode)
           car.setSpeed(ZERO);
-        message[index++] = r_char;
+        message[index++] = input;
         delay(10);        //to slow a bit so that data could not be missed
       }
       
-      if (r_char == '*')      //signal as a boundary info ends
+      if (input == '*')      //signal as a boundary info ends
       {
         String toBeSent = "";
         startStoring = false;
@@ -187,6 +188,7 @@ void detectingMine(){
     while(command != REPORT_MINE){
       command = Serial3.read();
     }
+    
     car.setSpeed(fSpeed);
     delay(500);
     car.setSpeed(reduceSpeed);
@@ -195,7 +197,7 @@ void detectingMine(){
 }
 
 void manualMode(){
-  char input = Serial3.read();
+  
   switch (input){
     case MOVE_FSPEED1:                          //Makes it go foward in slow speed
       car.setSpeed(sSpeed);
@@ -234,7 +236,8 @@ void manualMode(){
       car.setAngle(srDegrees);
       break;
     case STAND_STILL:                       //Makes it stop
-      car.setSpeed(reduceSpeed);
+      if(previousChar != STAND_STILL)
+        car.setSpeed(reduceSpeed);
       car.setSpeed(ZERO);
       car.setAngle(ZERO);
       break;
@@ -249,17 +252,16 @@ void manualMode(){
 }
 
 //Automatic mode methods:
-
 void autoMode(){
   if(backLat != "") //if boundary is defined
     lookForGPS();
-  char input = Serial3.read();
+  
     if(input == MANUAL_MODE){
       automode = false;
       car.setSpeed(reduceSpeed);
       car.setSpeed(ZERO);
     }
-    if(!obstacleExists()&& automode){
+    if(!obstacleExists() && automode){
       car.setAngle(ANGLE_CORRECTION);
       car.setSpeed(CAR_SPEED);
     } 
@@ -267,6 +269,7 @@ void autoMode(){
         rotateTillFree();
     }
 }
+
 /**
    Rotate the car at specified degrees with certain speed untill there is no obstacle
 */
@@ -308,8 +311,10 @@ int getObstacleDistance(){
   if (car.getDistance() >= minDistance) {
     car.setSpeed(0);
     car.update();
-  } else
+  } else{
+    //Serial.println(frontSensor.getDistance());
     return frontSensor.getDistance();
+  }
 }
 
 /**
