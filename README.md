@@ -23,13 +23,20 @@ The use of RFID and its reader could model the mines and the sensor respectively
 * L293D H-bridge
 * GY-50 gyroscope module
 * Odometers
+* Velleman VMA405 RFID-module
 
 ### Software
-The project will be using Arduino and Android libraries. Furthermore, the developers are aiming to develop necessary methods to complete the project.
-* [smartcar](https://github.com/platisd/smartcar_shield) - Library for Arduino based vehicles
 * [Android Studio](https://developer.android.com/studio) - IDE for Android applications
 * [Arduino IDE](https://www.arduino.cc/en/main/software) - IDE for Arduino boards
 
+### Arduino libraries
+* [smartcar](https://github.com/platisd/smartcar_shield) - Library for Arduino based vehicles
+* [RFID-RC522](https://github.com/song940/RFID-RC522) - Library for the RFID-reader
+
+### Android libraries
+* [GSON](https://github.com/google/gson) - A Java serialization/deserialization library to convert Java Objects into JSON and back
+* [Google Maps SDK](https://developers.google.com/maps/documentation/android-sdk/intro) - To implement a google map in application
+* [Mockito](https://site.mockito.org/) - Mocking framework for java unit tests
 
 ### Client Team
 * Dimitrios Platis
