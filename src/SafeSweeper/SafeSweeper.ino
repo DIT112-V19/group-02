@@ -18,7 +18,7 @@ const String TEST_VALUE = "c-83.582704 -142.186889/";
 String gpsLocation = NOT_FOUND;
 #define max_char 200       // number of characters to be saved
 char message[max_char];    // stores the characters message from app
-char r_char;               // reads each character from app sent as digital boundary
+char previousChar;               // the previous input
 byte index = 0;            // for array
 String backLat = ""; //boundary 1
 String frontLat = ""; //boundary 2
@@ -140,7 +140,7 @@ void loop() {
 
 void inputHandler(){
     index = 0;
-    
+    previousChar = input;
     //Reading location 
     while(Serial3.available() > 0){
       input = Serial3.read();      // Reads a character
@@ -236,6 +236,8 @@ void manualMode(){
       car.setAngle(srDegrees);
       break;
     case STAND_STILL:                       //Makes it stop
+      if(previousChar != STAND_STILL)
+        car.setSpeed(reduceSpeed);
       car.setSpeed(ZERO);
       car.setAngle(ZERO);
       break;
