@@ -492,7 +492,9 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         switch (item.getItemId()) {
             case R.id.map_item:
                 Intent intentM = new Intent(this, MapsActivity.class);
+                macAddress = macAddress + " " + getBoundary();
                 intentM.putExtra("MAC", macAddress);
+                System.out.println(macAddress);
                 startActivity(intentM);
                 return true;
             case R.id.bluetooth_item:
@@ -609,6 +611,14 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                 dialog.cancel();
             }
         });
+    }
+
+    //prepares digital boundaries for map
+    public String getBoundary(){
+        if (lat1Text != ""){
+            return lat1Text + " " + lat2Text + " " + lon1Text + " " + lon2Text;
+        } else
+            return "";
     }
 
     //write the digital boundary to the car
