@@ -24,7 +24,7 @@ public class BluetoothActivity extends AppCompatActivity implements PopupMenu.On
     private BluetoothAdapter BA;
 
     ListView lv;
-    Button btnOn, btnOff, btnRefresh, menuBtn;
+    Button switchOnOffBtn, btnRefresh, menuBtn;
     static String address;
 
 
@@ -35,11 +35,14 @@ public class BluetoothActivity extends AppCompatActivity implements PopupMenu.On
 
         BA = BluetoothAdapter.getDefaultAdapter();
 
-        btnOn = (Button) findViewById(R.id.btnOn);
-        btnOff = (Button) findViewById(R.id.btnOff);
+        switchOnOffBtn = (Button) findViewById(R.id.switchOnOffBtn);
         btnRefresh = (Button) findViewById(R.id.btnRefresh);
         lv = (ListView) findViewById(R.id.listView);
         menuBtn = (Button) findViewById(R.id.menuBtn);
+
+        if (BA.isEnabled()){
+            switchOnOffBtn.setText("TURN OFF");
+        }
 
         menuBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -53,19 +56,17 @@ public class BluetoothActivity extends AppCompatActivity implements PopupMenu.On
 
     }
 
-    public void on(View v) {
+    public void switchOnOff(View v) {
         if (!BA.isEnabled()) {
             Intent turnOn = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(turnOn, 0);
             Toast.makeText(getApplicationContext(), "Turned on", Toast.LENGTH_LONG).show();
+            switchOnOffBtn.setText("TURN OFF");
         } else {
-            Toast.makeText(getApplicationContext(), "Already on", Toast.LENGTH_LONG).show();
+            BA.disable();
+            Toast.makeText(getApplicationContext(), "Turned off", Toast.LENGTH_LONG).show();
+            switchOnOffBtn.setText("TURN ON");
         }
-    }
-
-    public void off(View v) {
-        BA.disable();
-        Toast.makeText(getApplicationContext(), "Turned off", Toast.LENGTH_LONG).show();
     }
 
     public void refresh(View v) {
@@ -98,21 +99,20 @@ public class BluetoothActivity extends AppCompatActivity implements PopupMenu.On
     public boolean onMenuItemClick(MenuItem item) {
         Toast.makeText(this, "Selected Item: " +item.getTitle(), Toast.LENGTH_SHORT).show();
         switch (item.getItemId()) {
-            /*
-            case R.id.home_item:
-                Intent intentH = new Intent(this, HomeActivity.class);
-                startActivity(intentH);
-                return true;*/
             case R.id.map_item:
-                //Intent intent = new Intent(this, HomeActivity.class);
+                if (address != null) {
+                    Intent intentM = new Intent(this, MapsActivity.class);
+                    startActivity(intentM);
+                } else {
+                    Toast.makeText(this,"Please select a bluetooth connection first!", Toast.LENGTH_SHORT).show();
+                }
                 return true;
             case R.id.control_item:
                 if (address != null) {
                     Intent intentC = new Intent(this, MainActivity.class);
 
                     startActivity(intentC);
-                } else
-                {
+                } else {
                     Toast.makeText(this,"Please select a bluetooth connection first!", Toast.LENGTH_SHORT).show();
                 }
                 return true;

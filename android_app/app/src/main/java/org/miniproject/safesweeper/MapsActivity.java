@@ -71,7 +71,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
      * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
+     * we just add a marker near Goteborg, Sweden.
      * If Google Play services is not installed on the device, the user will be prompted to install
      * it inside the SupportMapFragment. This method will only be triggered once the user has
      * installed Google Play services and returned to the app.
@@ -81,9 +81,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap = googleMap;
 
         // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        LatLng lindholmen = new LatLng(57.706206, 11.937860);
+        mMap.addMarker(new MarkerOptions().position(lindholmen).title("Marker in SGoteborg"));
+        //mMap.moveCamera(CameraUpdateFactory.newLatLng(lindholmen));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(lindholmen,16));
 
         new loadMines().execute();
     }
@@ -158,11 +159,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Toast.makeText(this,"You are already on this page!", Toast.LENGTH_SHORT).show();
                 return true;
             case R.id.control_item:
-                Intent intentC = new Intent(this, MainActivity.class);
-                address = address.substring(0, address.indexOf(" ")).trim();   //incase boundary was sent together
-                intentC.putExtra("MAC", address);
+                this.finish();
+                //Intent intentC = new Intent(this, MainActivity.class);
+                //address = address.substring(0, address.indexOf(" ")).trim();   //incase boundary was sent together
+                //intentC.putExtra("MAC", address);
                 //intentC.putExtra("MAP", "YES");
-                startActivity(intentC);
+                //startActivity(intentC);
                 return true;
             case R.id.bluetooth_item:
                 Intent intentB = new Intent(this, BluetoothActivity.class);
