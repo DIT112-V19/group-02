@@ -2,10 +2,10 @@
     <string name="app_name">SafeSweeper</string>
     <string name="add_boundary">Set Digital Boundary</string>
     <string name="sweeping_boundary">Sweeping Boundary</string>
-    <string name="lat1_00_000">Bottom Boundary</string>
-    <string name="lat2_00_000"> </string>
-    <string name="lon1_00_000">lon1</string>
-    <string name="lon2_00_000">lon2</string>
+    <string name="lat1_00_000">Bottom Latitude</string>
+    <string name="lat2_00_000">Top Latitude</string>
+    <string name="lon1_00_000">Left Longitude</string>
+    <string name="lon2_00_000">Right Longitude</string>
     <string name="cancel">Cancel</string>
     <string name="save">Save</string>
     <string name="title_activity_maps">Map</string>
