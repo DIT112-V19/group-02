@@ -86,9 +86,6 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        macAddress = getIntent().getStringExtra("MAC");
-
         throttleBar = (SeekBar) findViewById(R.id.throttleBar);
         steeringBar = (SeekBar) findViewById(R.id.steeringBar);
         throttleText = (TextView) findViewById(R.id.throttleText);
@@ -100,6 +97,8 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
         mineBtn = (Button) findViewById(R.id.mineBtn);
         menuBtn = (Button) findViewById(R.id.menuBtn);
         boundaryBtn = (Button) findViewById(R.id.boundaryBtn);
+
+        macAddress = getIntent().getStringExtra("MAC");
 
         menuBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -148,6 +147,7 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
                 }
             } catch (IOException e) {
                 ConnectSuccess = false;//if the try failed, you can check the exception here
+                Log.d("myTag", "FAILED");
             }
             return null;
         }
@@ -490,12 +490,10 @@ public class MainActivity extends AppCompatActivity implements PopupMenu.OnMenuI
     public boolean onMenuItemClick(MenuItem item) {
         Toast.makeText(this, "Selected Item: " +item.getTitle(), Toast.LENGTH_SHORT).show();
         switch (item.getItemId()) {
-            /*case R.id.home_item:
-                Intent intentH = new Intent(this, HomeActivity.class);
-                startActivity(intentH);
-                return true;*/
             case R.id.map_item:
-                //Intent intent = new Intent(this, HomeActivity.class);
+                Intent intentM = new Intent(this, MapsActivity.class);
+                intentM.putExtra("MAC", macAddress);
+                startActivity(intentM);
                 return true;
             case R.id.bluetooth_item:
                 Intent intentB = new Intent(this, BluetoothActivity.class);

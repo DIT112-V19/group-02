@@ -22,6 +22,7 @@
             android:layout_width="200dp"
             android:layout_height="200dp"
             android:layout_marginTop="15dp"
+            android:contentDescription="@string/logo"
             app:srcCompat="@drawable/safesweeper_logo" />
     </LinearLayout>
 
@@ -37,7 +38,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/bulletproofdecobb"
-            android:text="SafeSweeper"
+            android:text="@string/title"
             android:textSize="75sp" />
     </LinearLayout>
 
@@ -55,7 +56,7 @@
             android:layout_height="wrap_content"
             android:background="@drawable/btnbig"
             android:onClick="connect"
-            android:text="CONNECT"
+            android:text="@string/connect"
             android:textSize="24sp" />
     </LinearLayout>
 </RelativeLayout>
