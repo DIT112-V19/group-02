@@ -38,6 +38,9 @@ The use of RFID and its reader could model the mines and the sensor respectively
 * [Google Maps SDK](https://developers.google.com/maps/documentation/android-sdk/intro) - To implement a google map in application
 * [Mockito](https://site.mockito.org/) - Mocking framework for java unit tests
 
+### Presentation
+* [Video Demonstration of Product](https://youtu.be/ye_FWu3hwkU)
+
 ### Client Team
 * Dimitrios Platis
 * Jacob Olsson
